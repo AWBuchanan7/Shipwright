@@ -391,7 +391,7 @@ void DrawSettingsMenu() {
             UIWidgets::Tooltip("Changes the scaling of the ImGui menu elements.");
 
             UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
-            
+
             static std::unordered_map<LUS::WindowBackend, const char*> windowBackendNames = {
                 { LUS::WindowBackend::DX11, "DirectX" },
                 { LUS::WindowBackend::SDL_OPENGL, "OpenGL"},
@@ -468,9 +468,9 @@ void DrawSettingsMenu() {
             }
             ImGui::EndMenu();
         }
-        
+
         UIWidgets::Spacer(0);
-        
+
         if (ImGui::BeginMenu("Accessibility")) {
         #if defined(_WIN32) || defined(__APPLE__)
             UIWidgets::PaddedEnhancementCheckbox("Text to Speech", "gA11yTTS");
@@ -478,7 +478,7 @@ void DrawSettingsMenu() {
         #endif
             UIWidgets::PaddedEnhancementCheckbox("Disable Idle Camera Re-Centering", "gA11yDisableIdleCam");
             UIWidgets::Tooltip("Disables the automatic re-centering of the camera when idle.");
-            
+
             ImGui::EndMenu();
         }
         ImGui::EndMenu();
@@ -496,134 +496,70 @@ void DrawEnhancementsMenu() {
 
         UIWidgets::PaddedSeparator();
 
+        if (ImGui::BeginMenu("Bug Fixes"))
+        {
+            UIWidgets::PaddedEnhancementCheckbox("Fix Bush Item Drops", "gBushDropFix", true, false);
+            UIWidgets::Tooltip("Fixes the bushes to drop items correctly rather than spawning undefined items.");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Credits Timing", "gCreditsFix", true, false);
+            UIWidgets::Tooltip("Extend certain credits scenes so the music lines up properly with the visuals");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Deku Nut Upgrade", "gDekuNutUpgradeFix", true, false);
+            UIWidgets::Tooltip("Prevents the Forest Stage Deku Nut upgrade from becoming unobtainable after receiving the Poacher's Saw");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Gravedigging Tour Glitch", "gGravediggingTourFix", true, false);
+            UIWidgets::Tooltip("Fixes a bug where the Gravedigging Tour Heart Piece disappears if the area reloads");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Gerudo Warrior's Clothing Colors", "gGerudoWarriorClothingFix", true, false);
+            UIWidgets::Tooltip("Prevent the Gerudo Warrior's clothes changing color when changing Link's tunic or using bombs in front of her");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Link's Eyes Open While Sleeping", "gFixEyesOpenWhileSleeping", true, false);
+            UIWidgets::Tooltip("Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping.");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Missing Jingle After 5 Silver Rupees", "gSilverRupeeJingleExtend", true, false);
+            UIWidgets::Tooltip(
+                "Adds 5 higher pitches for the Silver Rupee Jingle for the rooms with more than 5 Silver Rupees. "
+                "Currently only relevant in Master Quest.");
+            if (UIWidgets::PaddedEnhancementCheckbox("Fix Out of Bounds Textures", "gFixTexturesOOB", true, false)) {
+                ApplyAuthenticGfxPatches();
+            }
+            UIWidgets::Tooltip("Fixes authentic out of bounds texture reads, instead loading textures with the correct size");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Poacher's Saw Softlock", "gFixSawSoftlock", true, false, CVarGetInteger("gSkipText", 0),
+                "This is disabled because it is forced on when Skip Text is enabled.", UIWidgets::CheckboxGraphics::Checkmark);
+            UIWidgets::Tooltip("Prevents the Poacher's Saw softlock from mashing through the text, or with Skip Text enabled.");
+
+            ImGui::EndMenu();
+        }
+
+        UIWidgets::Spacer(0);
+
+        if (ImGui::BeginMenu("Camera"))
+        {
+            UIWidgets::PaddedEnhancementCheckbox("Disable Idle Camera Re-Centering", "gA11yDisableIdleCam");
+            UIWidgets::Tooltip("Disables the automatic re-centering of the camera when idle.");
+            UIWidgets::PaddedEnhancementCheckbox("Disable Black Bar Letterboxes", "gDisableBlackBars", true, false);
+            UIWidgets::Tooltip("Disables Black Bar Letterboxes during cutscenes and Z-targeting\nNote: there may be minor visual glitches that were covered up by the black bars\nPlease disable this setting before reporting a bug");
+            UIWidgets::PaddedEnhancementCheckbox("Disable Crit Camera Wiggle", "gDisableCritWiggle", true, false);
+            UIWidgets::Tooltip("Disable random camera wiggle at low health.");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementCheckbox("Hookshot Reticle Reacts to Target", "gHookshotableReticle", true, false);
+            UIWidgets::Tooltip("Use a different color when aiming at hookshotable collision");
+            UIWidgets::PaddedEnhancementCheckbox("Show Gauntlets in First Person", "gFPSGauntlets", true, false);
+            UIWidgets::Tooltip("Renders Gauntlets when using the Bow and Hookshot like in OOT3D");
+            UIWidgets::PaddedEnhancementCheckbox("Show Reticle for Bow and Slingshot", "gBowReticle", true, false);
+            UIWidgets::Tooltip("Aiming with a bow or slingshot will display a reticle as with the hookshot when the projectile is ready to fire.");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementCheckbox("Fix Camera Drift", "gFixCameraDrift", true, false);
+            UIWidgets::Tooltip("Fixes camera slightly drifting to the left when standing still due to a math error");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Camera Swing", "gFixCameraSwing", true, false);
+            UIWidgets::Tooltip("Fixes camera getting stuck on collision when standing still, also fixes slight shift back in camera when stop moving");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Hanging Ledge Swing Rate", "gFixHangingLedgeSwingRate", true, false);
+            UIWidgets::Tooltip("Fixes camera swing rate when player falls off a ledge and camera swings around");
+            ImGui::EndMenu();
+        }
+
+        UIWidgets::Spacer(0);
+
         if (ImGui::BeginMenu("Gameplay"))
         {
-            if (ImGui::BeginMenu("Time Savers"))
-            {
-                UIWidgets::PaddedEnhancementSliderInt("Text Speed: %dx", "##TEXTSPEED", "gTextSpeed", 1, 5, "", 1, true, false, true);
-                UIWidgets::PaddedEnhancementCheckbox("Skip Text", "gSkipText", false, true);
-                UIWidgets::Tooltip("Holding down B skips text");
-                UIWidgets::PaddedEnhancementSliderInt("King Zora Speed: %dx", "##MWEEPSPEED", "gMweepSpeed", 1, 5, "", 1, true, false, true);
-                UIWidgets::PaddedEnhancementSliderInt("Biggoron Forge Time: %d days", "##FORGETIME", "gForgeTime", 0, 3, "", 3, true, false, true);
-                UIWidgets::Tooltip("Allows you to change the number of days it takes for Biggoron to forge the Biggoron Sword");
-                UIWidgets::PaddedEnhancementSliderInt("Vine/Ladder Climb speed +%d", "##CLIMBSPEED", "gClimbSpeed", 0, 12, "", 0, true, false, true);
-                UIWidgets::PaddedEnhancementSliderInt("Block pushing speed +%d", "##BLOCKSPEED", "gFasterBlockPush", 0, 5, "", 0, true, false, true);
-                UIWidgets::PaddedEnhancementCheckbox("Faster Heavy Block Lift", "gFasterHeavyBlockLift", true, false);
-                UIWidgets::Tooltip("Speeds up lifting silver rocks and obelisks");
-                UIWidgets::PaddedEnhancementCheckbox("Link as default file name", "gLinkDefaultName", true, false);
-                UIWidgets::Tooltip("Allows you to have \"Link\" as a premade file name");
-                UIWidgets::PaddedEnhancementCheckbox("No Forced Navi", "gNoForcedNavi", true, false);
-                UIWidgets::Tooltip("Prevent forced Navi conversations");
-                UIWidgets::PaddedEnhancementCheckbox("No Skulltula Freeze", "gSkulltulaFreeze", true, false);
-                UIWidgets::Tooltip("Stops the game from freezing the player when picking up Gold Skulltulas");
-                UIWidgets::PaddedEnhancementCheckbox("Fast Chests", "gFastChests", true, false);
-                UIWidgets::Tooltip("Kick open every chest");
-                UIWidgets::PaddedText("Chest size & texture matches contents", true, false);
-                if (UIWidgets::EnhancementCombobox("gChestSizeAndTextureMatchesContents", chestStyleMatchesContentsOptions, CSMC_DISABLED)) {
-                    if (CVarGetInteger("gChestSizeAndTextureMatchesContents", CSMC_DISABLED) == CSMC_DISABLED) {
-                        CVarSetInteger("gChestSizeDependsStoneOfAgony", 0);
-                    }
-                }
-                UIWidgets::Tooltip(
-                    "Chest sizes and textures are changed to help identify the item inside.\n"
-                    " - Major items: Large gold chests\n"
-                    " - Lesser items: Large brown chests\n"
-                    " - Junk items: Small brown chests\n"
-                    " - Small keys: Small silver chest\n"
-                    " - Boss keys: Vanilla size and texture\n"
-                    " - Skulltula Tokens: Small skulltula chest\n"
-                    "\n"
-                    "NOTE: Textures will not apply if you are using a mod pack with a custom chest model."
-                );
-                if (CVarGetInteger("gChestSizeAndTextureMatchesContents", CSMC_DISABLED) != CSMC_DISABLED) {
-                    UIWidgets::PaddedEnhancementCheckbox("Chests of Agony", "gChestSizeDependsStoneOfAgony", true, false);
-                    UIWidgets::Tooltip("Only change the size/texture of chests if you have the Stone of Agony.");
-                }
-                UIWidgets::PaddedEnhancementCheckbox("Skip Pickup Messages", "gFastDrops", true, false);
-                UIWidgets::Tooltip("Skip pickup messages for new consumable items and bottle swipes");
-                UIWidgets::PaddedEnhancementCheckbox("Ask to Equip New Items", "gAskToEquip", true, false);
-                UIWidgets::Tooltip("Adds a prompt to equip newly-obtained swords, shields and tunics");
-                UIWidgets::PaddedEnhancementCheckbox("Better Owl", "gBetterOwl", true, false);
-                UIWidgets::Tooltip("The default response to Kaepora Gaebora is always that you understood what he said");
-                UIWidgets::PaddedEnhancementCheckbox("Fast Ocarina Playback", "gFastOcarinaPlayback", true, false);
-                bool forceSkipScarecrow = IS_RANDO &&
-                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SKIP_SCARECROWS_SONG);
-                static const char* forceSkipScarecrowText =
-                    "This setting is forcefully enabled because a savefile\nwith \"Skip Scarecrow Song\" is loaded";
-                UIWidgets::Tooltip("Skip the part where the Ocarina playback is called when you play a song");
-                UIWidgets::PaddedEnhancementCheckbox("Skip Scarecrow Song", "gSkipScarecrow", true, false,
-                                                        forceSkipScarecrow, forceSkipScarecrowText, UIWidgets::CheckboxGraphics::Checkmark);
-                UIWidgets::Tooltip("Pierre appears when Ocarina is pulled out. Requires learning scarecrow song.");
-                UIWidgets::PaddedEnhancementCheckbox("Remember Save Location", "gRememberSaveLocation", true, false);
-                UIWidgets::Tooltip("When loading a save, places Link at the last entrance he went through.\n"
-                        "This doesn't work if the save was made in a grotto.");
-                UIWidgets::PaddedEnhancementCheckbox("Skip Magic Arrow Equip Animation", "gSkipArrowAnimation", true, false);
-                UIWidgets::PaddedEnhancementCheckbox("Skip save confirmation", "gSkipSaveConfirmation", true, false);
-                UIWidgets::Tooltip("Skip the \"Game saved.\" confirmation screen");
-                UIWidgets::PaddedEnhancementCheckbox("Exit Market at Night", "gMarketSneak", true, false);
-                UIWidgets::Tooltip("Allows exiting Hyrule Castle Market Town to Hyrule Field at night by speaking "
-                "to the guard next to the gate.");
-                UIWidgets::PaddedEnhancementCheckbox("Faster Farore's Wind", "gFastFarores", true, false);
-                UIWidgets::Tooltip("Greatly decreases cast time of Farore's Wind magic spell.");
-                UIWidgets::PaddedEnhancementCheckbox("Nighttime GS Always Spawn", "gNightGSAlwaysSpawn", true, false);
-                UIWidgets::Tooltip("Nighttime Skulltulas will spawn during both day and night.");
-                UIWidgets::PaddedEnhancementCheckbox("Dampe Appears All Night", "gDampeAllNight", true, false);
-                UIWidgets::Tooltip("Makes Dampe appear anytime during the night, not just his usual working hours.");
-                UIWidgets::PaddedText("Time Travel with the Song of Time", true, false);
-                UIWidgets::EnhancementCombobox("gTimeTravel", timeTravelOptions, 0);
-                UIWidgets::Tooltip("Allows Link to freely change age by playing the Song of Time.\n"
-                    "Time Blocks can still be used properly.\n\n"
-                    "Requirements:\n"
-                    "- Obtained the Ocarina of Time (depends on selection)\n"
-                    "- Obtained the Song of Time\n"
-                    "- Obtained the Master Sword\n"
-                    "- Not within range of Time Block\n"
-                    "- Not within range of Ocarina playing spots");
-                ImGui::EndMenu();
-            }
 
-            UIWidgets::Spacer(0);
-
-            if (ImGui::BeginMenu("Items"))
-            {
-                UIWidgets::PaddedEnhancementCheckbox("Instant Putaway", "gInstantPutaway", true, false);
-                UIWidgets::Tooltip("Allow Link to put items away without having to wait around");
-                UIWidgets::PaddedEnhancementCheckbox("Instant Boomerang Recall", "gFastBoomerang", true, false);
-                UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air");
-                UIWidgets::PaddedEnhancementCheckbox("Prevent Dropped Ocarina Inputs", "gDpadNoDropOcarinaInput", true, false);
-                UIWidgets::Tooltip("Prevent dropping inputs when playing the ocarina quickly");
-                UIWidgets::PaddedText("Bunny Hood Effect", true, false);
-                UIWidgets::EnhancementCombobox("gMMBunnyHood", bunnyHoodOptions, BUNNY_HOOD_VANILLA);
-                UIWidgets::Tooltip(
-                    "Wearing the Bunny Hood grants a speed increase like in Majora's Mask. The longer jump option is not accounted for in randomizer logic.\n\n"
-                    "Also disables NPC's reactions to wearing the Bunny Hood."
-                );
-                UIWidgets::PaddedEnhancementCheckbox("Bunny Hood Equippable as Adult", "gAdultBunnyHood", true, false, (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) == BUNNY_HOOD_VANILLA), "Only available with increased bunny hood speed", UIWidgets::CheckboxGraphics::Cross, false);
-                UIWidgets::Tooltip("Allows the bunny hood to be equipped normally from the pause menu as adult.");
-                UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
-                UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
-                UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
-                UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
-                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-                UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots");
-                UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false);
-                UIWidgets::Tooltip("Allows child to use bow with arrows.\nAllows adult to use slingshot with seeds.\n\nRequires glitches or 'Timeless Equipment' cheat to equip.");
-                UIWidgets::PaddedEnhancementCheckbox("Better Farore's Wind", "gBetterFW", true, false);
-                UIWidgets::Tooltip("Helps FW persist between ages, gives child and adult separate FW points, and can be used in more places.");
-                UIWidgets::PaddedEnhancementCheckbox("Remove Explosive Limit", "gRemoveExplosiveLimit", true, false);
-                UIWidgets::Tooltip("Removes the cap of 3 active explosives being deployed at once.");
-                UIWidgets::PaddedEnhancementCheckbox("Static Explosion Radius", "gStaticExplosionRadius", true, false);
-                UIWidgets::Tooltip("Explosions are now a static size, like in Majora's Mask and OoT3D. Makes bombchu hovering much easier.");
-                UIWidgets::PaddedEnhancementCheckbox("Prevent Bombchus Forcing First-Person", "gDisableFirstPersonChus", true, false);
-                UIWidgets::Tooltip("Prevent bombchus from forcing the camera into first-person mode when released.");
-                UIWidgets::PaddedEnhancementCheckbox("Aiming reticle for the bow/slingshot", "gBowReticle", true, false);
-                UIWidgets::Tooltip("Aiming with a bow or slingshot will display a reticle as with the hookshot when the projectile is ready to fire.");
-                ImGui::EndMenu();
-            }
-
-            UIWidgets::Spacer(0);
-
-            if (ImGui::BeginMenu("Difficulty Options"))
+            if (ImGui::BeginMenu("Combat & Difficulty"))
             {
                 ImGui::Text("Damage Multiplier");
                 UIWidgets::EnhancementCombobox("gDamageMul", allPowers, 0);
@@ -664,221 +600,292 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedText("Bonk Damage Multiplier", true, false);
                 UIWidgets::EnhancementCombobox("gBonkDamageMul", bonkDamageValues, BONK_DAMAGE_NONE);
                 UIWidgets::Tooltip("Modifies damage taken after bonking.");
-                UIWidgets::PaddedEnhancementCheckbox("Spawn with full health", "gFullHealthSpawn", true, false);
-                UIWidgets::Tooltip("Respawn with full health instead of 3 Hearts");
-                UIWidgets::PaddedEnhancementCheckbox("No Random Drops", "gNoRandomDrops", true, false);
-                UIWidgets::Tooltip("Disables random drops, except from the Goron Pot, Dampe, and bosses");
-                bool forceEnableBombchuDrops = IS_RANDO &&
-                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_ENABLE_BOMBCHU_DROPS) == 1;
-                static const char* forceEnableBombchuDropsText =
-                    "This setting is forcefully enabled because a savefile\nwith \"Enable Bombchu Drops\" is loaded.";
-                UIWidgets::PaddedEnhancementCheckbox("Enable Bombchu Drops", "gBombchuDrops", true, false,
-                                                        forceEnableBombchuDrops, forceEnableBombchuDropsText, UIWidgets::CheckboxGraphics::Checkmark);
-                UIWidgets::Tooltip("Bombchus will sometimes drop in place of bombs");
-                UIWidgets::PaddedEnhancementCheckbox("Trees Drop Sticks", "gTreeStickDrops", true, false);
-                UIWidgets::Tooltip("Bonking into trees will have a chance to drop up to 3 sticks. Must already have obtained sticks.");
-                UIWidgets::PaddedEnhancementCheckbox("No Heart Drops", "gNoHeartDrops", true, false);
-                UIWidgets::Tooltip("Disables heart drops, but not heart placements, like from a Deku Scrub running off\nThis simulates Hero Mode from other games in the series");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementCheckbox("Spawn with Full Health", "gFullHealthSpawn", true, false);
+                UIWidgets::Tooltip("Respawn with full health instead of 3 Hearts.");
+                UIWidgets::PaddedSeparator();
+
                 UIWidgets::PaddedEnhancementCheckbox("Hyper Bosses", "gHyperBosses", true, false);
                 UIWidgets::Tooltip("All major bosses move and act twice as fast.");
                 UIWidgets::PaddedEnhancementCheckbox("Hyper Enemies", "gHyperEnemies", true, false);
                 UIWidgets::Tooltip("All regular enemies and mini-bosses move and act twice as fast.");
-                UIWidgets::PaddedEnhancementCheckbox("Always Win Goron Pot", "gGoronPot", true, false);
-                UIWidgets::Tooltip("Always get the heart piece/purple rupee from the spinning Goron pot");
-                UIWidgets::PaddedEnhancementCheckbox("Always Win Dampe Digging Game", "gDampeWin", true, false, SaveManager::Instance->IsRandoFile(),
-                                                        "This setting is always enabled in randomizer files", UIWidgets::CheckboxGraphics::Checkmark);
-                UIWidgets::Tooltip("Always win the heart piece/purple rupee on the first dig in Dampe's grave digging game, just like in rando\nIn a rando file, this is unconditionally enabled");
-                UIWidgets::PaddedEnhancementCheckbox("All Dogs are Richard", "gAllDogsRichard", true, false);
-                UIWidgets::Tooltip("All dogs can be traded in and will count as Richard.");
-                UIWidgets::Spacer(0);
+                UIWidgets::PaddedSeparator();
 
-                if (ImGui::BeginMenu("Potion Values"))
-                {
-                    UIWidgets::EnhancementCheckbox("Change Red Potion Effect", "gRedPotionEffect");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Red Potions");
-                    bool disabledRedPotion = !CVarGetInteger("gRedPotionEffect", 0);
-                    static const char* disabledTooltipRedPotion = "This option is disabled because \"Change Red Potion Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Red Potion Health: %d", "##REDPOTIONHEALTH", "gRedPotionHealth", 1, 100, "", 0, true, disabledRedPotion, disabledTooltipRedPotion);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Red Potions");
-                    UIWidgets::EnhancementCheckbox("Red Potion Percent Restore", "gRedPercentRestore", disabledRedPotion, disabledTooltipRedPotion);
-                    UIWidgets::Tooltip("Toggles from Red Potions restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedEnhancementCheckbox("Instant Item Putaway", "gInstantPutaway", true, false);
+                UIWidgets::Tooltip("Allow Link to put items away without having to wait around");
+                UIWidgets::PaddedEnhancementCheckbox("Instant Boomerang Recall", "gFastBoomerang", true, false);
+                UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air");
+                UIWidgets::PaddedSeparator();
 
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Change Green Potion Effect", "gGreenPotionEffect");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of mana restored by Green Potions");
-                    bool disabledGreenPotion = !CVarGetInteger("gGreenPotionEffect", 0);
-                    static const char* disabledTooltipGreenPotion = "This option is disabled because \"Change Green Potion Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Green Potion Mana: %d", "##GREENPOTIONMANA", "gGreenPotionMana", 1, 100, "", 0, true, disabledGreenPotion, disabledTooltipGreenPotion);
-                    UIWidgets::Tooltip("Changes the amount of mana restored by Green Potions, base max mana is 48, max upgraded mana is 96");
-                    UIWidgets::EnhancementCheckbox("Green Potion Percent Restore", "gGreenPercentRestore", disabledGreenPotion, disabledTooltipGreenPotion);
-                    UIWidgets::Tooltip("Toggles from Green Potions restoring a fixed amount of mana to a percent of the player's current max mana");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Change Blue Potion Effects", "gBluePotionEffects");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health and mana restored by Blue Potions");
-                    bool disabledBluePotion = !CVarGetInteger("gBluePotionEffects", 0);
-                    static const char* disabledTooltipBluePotion = "This option is disabled because \"Change Blue Potion Effects\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Blue Potion Health: %d", "##BLUEPOTIONHEALTH", "gBluePotionHealth", 1, 100, "", 0, true, disabledBluePotion, disabledTooltipBluePotion);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Blue Potions");
-                    UIWidgets::EnhancementCheckbox("Blue Potion Health Percent Restore", "gBlueHealthPercentRestore", disabledBluePotion, disabledTooltipBluePotion);
-                    UIWidgets::Tooltip("Toggles from Blue Potions restoring a fixed amount of health to a percent of the player's current max health");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementSliderInt("Blue Potion Mana: %d", "##BLUEPOTIONMANA", "gBluePotionMana", 1, 100, "", 0, true, disabledBluePotion, disabledTooltipBluePotion);
-                    UIWidgets::Tooltip("Changes the amount of mana restored by Blue Potions, base max mana is 48, max upgraded mana is 96");
-                    UIWidgets::EnhancementCheckbox("Blue Potion Mana Percent Restore", "gBlueManaPercentRestore", disabledBluePotion, disabledTooltipBluePotion);
-                    UIWidgets::Tooltip("Toggles from Blue Potions restoring a fixed amount of mana to a percent of the player's current max mana");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Change Milk Effect", "gMilkEffect");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Milk");
-                    bool disabledMilk = !CVarGetInteger("gMilkEffect", 0);
-                    static const char* disabledTooltipMilk = "This option is disabled because \"Change Milk Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Milk Health: %d", "##MILKHEALTH", "gMilkHealth", 1, 100, "", 0, true, disabledMilk, disabledTooltipMilk);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Milk");
-                    UIWidgets::EnhancementCheckbox("Milk Percent Restore", "gMilkPercentRestore", disabledMilk, disabledTooltipMilk);
-                    UIWidgets::Tooltip("Toggles from Milk restoring a fixed amount of health to a percent of the player's current max health");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Separate Half Milk Effect", "gSeparateHalfMilkEffect", disabledMilk, disabledTooltipMilk);
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Half Milk\nIf this is disabled, Half Milk will behave the same as Full Milk.");
-                    bool disabledHalfMilk = disabledMilk || !CVarGetInteger("gSeparateHalfMilkEffect", 0);
-                    static const char* disabledTooltipHalfMilk = "This option is disabled because \"Separate Half Milk Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Half Milk Health: %d", "##HALFMILKHEALTH", "gHalfMilkHealth", 1, 100, "", 0, true, disabledHalfMilk, disabledTooltipHalfMilk);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Half Milk");
-                    UIWidgets::EnhancementCheckbox("Half Milk Percent Restore", "gHalfMilkPercentRestore", disabledHalfMilk, disabledTooltipHalfMilk);
-                    UIWidgets::Tooltip("Toggles from Half Milk restoring a fixed amount of health to a percent of the player's current max health");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Change Fairy Effect", "gFairyEffect");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Fairies");
-                    bool disabledFairy = !CVarGetInteger("gFairyEffect", 0);
-                    static const char* disabledTooltipFairy = "This option is disabled because \"Change Fairy Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Fairy: %d", "##FAIRYHEALTH", "gFairyHealth", 1, 100, "", 0, true, disabledFairy, disabledTooltipFairy);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Fairies");
-                    UIWidgets::EnhancementCheckbox("Fairy Percent Restore", "gFairyPercentRestore", disabledFairy, disabledTooltipFairy);
-                    UIWidgets::Tooltip("Toggles from Fairies restoring a fixed amount of health to a percent of the player's current max health");
-
-                    ImGui::Separator();
-
-                    UIWidgets::EnhancementCheckbox("Change Fairy Revive Effect", "gFairyReviveEffect");
-                    UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Fairy Revivals");
-                    bool disabledFairyRevive = !CVarGetInteger("gFairyReviveEffect", 0);
-                    static const char* disabledTooltipFairyRevive = "This option is disabled because \"Change Fairy Revive Effect\" is turned off";
-                    UIWidgets::EnhancementSliderInt("Fairy Revival: %d", "##FAIRYREVIVEHEALTH", "gFairyReviveHealth", 1, 100, "", 0, true, disabledFairyRevive, disabledTooltipFairyRevive);
-                    UIWidgets::Tooltip("Changes the amount of health restored by Fairy Revivals");
-                    UIWidgets::EnhancementCheckbox("Fairy Revive Percent Restore", "gFairyRevivePercentRestore", disabledFairyRevive, disabledTooltipFairyRevive);
-                    UIWidgets::Tooltip("Toggles from Fairy Revivals restoring a fixed amount of health to a percent of the player's current max health");
-
-                    ImGui::EndMenu();
+                UIWidgets::PaddedEnhancementCheckbox("Fix Anubis Fireballs", "gAnubisFix", true, false);
+                UIWidgets::Tooltip("Make Anubis fireballs do fire damage when reflected back at them with the Mirror Shield");
+                UIWidgets::PaddedEnhancementCheckbox("Fix Enemies Not Spawning Near Water", "gEnemySpawnsOverWaterboxes", true, false);
+                UIWidgets::Tooltip("Causes respawning enemies, like stalchildren, to appear on land near bodies of water. "
+                                    "Fixes an incorrect calculation that acted like water underneath ground was above it.");
+                            if (UIWidgets::PaddedEnhancementCheckbox("Fix Megaton Hammer Crouch Stab", "gCrouchStabHammerFix", true, false)) {
+                    if (!CVarGetInteger("gCrouchStabHammerFix", 0)) {
+                        CVarClear("gCrouchStabFix");
+                    }
                 }
-
-                UIWidgets::Spacer(0);
-
-                if (ImGui::BeginMenu("Shooting Gallery")) {
-                    UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeShootingGallery");
-                    UIWidgets::Tooltip("Turn on/off changes to the shooting gallery behavior");
-                    bool disabled = !CVarGetInteger("gCustomizeShootingGallery", 0);
-                    static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
-                    UIWidgets::PaddedEnhancementCheckbox("Instant Win", "gInstantShootingGalleryWin", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("Skips the shooting gallery minigame");
-                    UIWidgets::PaddedEnhancementCheckbox("No Rupee Randomization", "gConstantAdultGallery", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("Forces the rupee order to not be randomized as adult, making it the same as chlid");
-                    UIWidgets::PaddedEnhancementSliderInt("Child Starting Ammunition: %d", "##cShootingGalleryAmmunition", "gChildShootingGalleryAmmunition", 10, 30, "", 15, true, true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("The ammunition at the start of the shooting gallery minigame as a child");
-                    UIWidgets::PaddedEnhancementSliderInt("Adult Starting Ammunition: %d", "##aShootingGalleryAmmunition", "gAdultShootingGalleryAmmunition", 10, 30, "", 15, true, true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("The ammunition at the start of the shooting gallery minigame as an adult");
-                    ImGui::EndMenu();
+                UIWidgets::Tooltip("Make the Megaton Hammer's crouch stab able to destroy rocks without first swinging it normally");
+                if (CVarGetInteger("gCrouchStabHammerFix", 0)) {
+                    UIWidgets::PaddedEnhancementCheckbox("Remove Power Crouch Stab", "gCrouchStabFix", true, false);
+                    UIWidgets::Tooltip("Make crouch stabbing always do the same damage as a regular slash");
                 }
-
-                UIWidgets::Spacer(0);
-
-                if (ImGui::BeginMenu("Bombchu Bowling")) {
-                    UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeBombchuBowling");
-                    UIWidgets::Tooltip("Turn on/off changes to the bombchu bowling behavior");
-                    bool disabled = CVarGetInteger("gCustomizeBombchuBowling", 0) == 0;
-                    static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
-                    UIWidgets::PaddedEnhancementCheckbox("Remove Small Cucco", "gBombchuBowlingNoSmallCucco", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("Prevents the small cucco from appearing in the bombchu bowling minigame");
-                    UIWidgets::PaddedEnhancementCheckbox("Remove Big Cucco", "gBombchuBowlingNoBigCucco", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("Prevents the big cucco from appearing in the bombchu bowling minigame");
-                    UIWidgets::PaddedEnhancementSliderInt("Bombchu Count: %d", "##cBombchuBowlingAmmunition", "gBombchuBowlingAmmunition", 3, 20, "", 10, true, true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("The number of bombchus available at the start of the bombchu bowling minigame");
-                    ImGui::EndMenu();
-                }
-
-                UIWidgets::Spacer(0);
-
-                if (ImGui::BeginMenu("Fishing")) {
-                    UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeFishing");
-                    UIWidgets::Tooltip("Turn on/off changes to the fishing behavior");
-                    bool disabled = !CVarGetInteger("gCustomizeFishing", 0);
-                    static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
-                    UIWidgets::PaddedEnhancementCheckbox("Instant Fishing", "gInstantFishing", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("All fish will be caught instantly");
-                    UIWidgets::PaddedEnhancementCheckbox("Guarantee Bite", "gGuaranteeFishingBite", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("When a line is stable, guarantee bite. Otherwise use default logic");
-                    UIWidgets::PaddedEnhancementCheckbox("Fish Never Escape", "gFishNeverEscape", true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("Once a hook has been set, fish will never let go while being reeled in.");
-                    UIWidgets::PaddedEnhancementSliderInt("Child Minimum Weight: %d", "##cMinimumWeight", "gChildMinimumWeightFish", 3, 10, "", 10, true, true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("The minimum weight for the unique fishing reward as a child");
-                    UIWidgets::PaddedEnhancementSliderInt("Adult Minimum Weight: %d", "##aMinimumWeight", "gAdultMinimumWeightFish", 6, 13, "", 13, true, true, false, disabled, disabledTooltip);
-                    UIWidgets::Tooltip("The minimum weight for the unique fishing reward as an adult");
-                    ImGui::EndMenu();
-                }
-
                 ImGui::EndMenu();
             }
 
             UIWidgets::Spacer(0);
 
-            if (ImGui::BeginMenu("Reduced Clutter"))
+            if (ImGui::BeginMenu("Time Savers"))
             {
+                UIWidgets::PaddedEnhancementSliderInt("Text Speed: %dx", "##TEXTSPEED", "gTextSpeed", 1, 5, "", 1, true, false, true);
+                UIWidgets::PaddedEnhancementCheckbox("B to Skip Text", "gSkipText", false, true);
+                UIWidgets::Tooltip("Holding down B skips text");
+                UIWidgets::PaddedEnhancementSliderInt("King Zora Speed: %dx", "##MWEEPSPEED", "gMweepSpeed", 1, 5, "", 1, true, false, true);
+                UIWidgets::PaddedEnhancementSliderInt("Biggoron Forge Time: %d days", "##FORGETIME", "gForgeTime", 0, 3, "", 3, true, false, true);
+                UIWidgets::Tooltip("Allows you to change the number of days it takes for Biggoron to forge the Biggoron Sword");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementSliderInt("Vine/Ladder Climb Speed +%d", "##CLIMBSPEED", "gClimbSpeed", 0, 12, "", 0, true, false, true);
+                UIWidgets::PaddedEnhancementSliderInt("Block Pushing Speed +%d", "##BLOCKSPEED", "gFasterBlockPush", 0, 5, "", 0, true, false, true);
+                UIWidgets::PaddedEnhancementCheckbox("Faster Heavy Block Lift", "gFasterHeavyBlockLift", true, false);
+                UIWidgets::Tooltip("Speeds up lifting silver rocks and obelisks");
+                UIWidgets::PaddedEnhancementCheckbox("Faster Chest Opening", "gFastChests", true, false);
+                UIWidgets::Tooltip("Kick open every chest");
+                UIWidgets::PaddedEnhancementCheckbox("Faster Ocarina Playback", "gFastOcarinaPlayback", true, false);
+                UIWidgets::PaddedSeparator();
+
+                bool forceSkipScarecrow = IS_RANDO &&
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SKIP_SCARECROWS_SONG);
+                static const char* forceSkipScarecrowText =
+                    "This setting is forcefully enabled because a savefile\nwith \"Skip Scarecrow Song\" is loaded";
+                UIWidgets::Tooltip("Skip the part where the Ocarina playback is called when you play a song");
+                UIWidgets::PaddedEnhancementCheckbox("Skip Scarecrow Song", "gSkipScarecrow", true, false,
+                                                        forceSkipScarecrow, forceSkipScarecrowText, UIWidgets::CheckboxGraphics::Checkmark);
+                UIWidgets::Tooltip("Pierre appears when Ocarina is pulled out. Requires learning scarecrow song.");
+                UIWidgets::PaddedEnhancementCheckbox("Skip 'Game Saved' Confirmation", "gSkipSaveConfirmation", true, false);
+                UIWidgets::Tooltip("Skip the \"Game saved.\" confirmation screen.");
+                UIWidgets::PaddedEnhancementCheckbox("Skip Item Pickup Messages", "gFastDrops", true, false);
+                UIWidgets::Tooltip("Skip pickup messages for new consumable items and bottle swipes.");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Quality of Life"))
+            {
+                UIWidgets::PaddedEnhancementCheckbox("Auto-Select 'I Understand' (Better Owl)", "gBetterOwl", true, false);
+                UIWidgets::Tooltip("The default response to Kaepora Gaebora is always that you understood what he said.");
+                UIWidgets::PaddedEnhancementCheckbox("Better Farore's Wind", "gBetterFW", true, false);
+                UIWidgets::Tooltip("Helps FW persist between ages, gives child and adult separate FW points, and can be used in more places.");
+                UIWidgets::PaddedEnhancementCheckbox("Faster Farore's Wind", "gFastFarores", true, false);
+                UIWidgets::Tooltip("Greatly decreases cast time of Farore's Wind magic spell.");
+                UIWidgets::PaddedEnhancementCheckbox("Prevent Falling From Vine Edges", "gFixVineFall", true, false);
+                UIWidgets::Tooltip("Prevents immediately falling off climbable surfaces if climbing on the edges.");
+                UIWidgets::PaddedEnhancementCheckbox("Remember Save Location", "gRememberSaveLocation", true, false);
+                UIWidgets::Tooltip("When loading a save, places Link at the last entrance he went through.\n"
+                        "This doesn't work if the save was made in a grotto.");
+                UIWidgets::PaddedSeparator();
+
                 UIWidgets::EnhancementCheckbox("Mute Low HP Alarm", "gLowHpAlarm");
                 UIWidgets::Tooltip("Disable the low HP beeping sound");
-                UIWidgets::PaddedEnhancementCheckbox("Minimal UI", "gMinimalUI", true, false);
-                UIWidgets::Tooltip("Hides most of the UI when not needed\nNote: Doesn't activate until after loading a new scene");
-                UIWidgets::PaddedEnhancementCheckbox("Disable Navi Call Audio", "gDisableNaviCallAudio", true, false);
+                UIWidgets::PaddedEnhancementCheckbox("Mute Navi Call", "gDisableNaviCallAudio", true, false);
                 UIWidgets::Tooltip("Disables the voice audio when Navi calls you");
-                UIWidgets::PaddedEnhancementCheckbox("Disable Hot/Underwater Warning Text", "gDisableTunicWarningText", true, false);
-                UIWidgets::Tooltip("Disables warning text when you don't have on the Goron/Zora Tunic in Hot/Underwater conditions.");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementCheckbox("Disable Forced Navi Conversations", "gNoForcedNavi", true, false);
+                UIWidgets::Tooltip("Prevent forced Navi conversations");
+                UIWidgets::PaddedEnhancementCheckbox("Disable Gold Skulltula Freeze", "gSkulltulaFreeze", true, false);
+                UIWidgets::Tooltip("Stops the game from freezing the player when picking up Gold Skulltulas");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedText("Chest Size & Texture Matches Contents", true, false);
+                if (UIWidgets::EnhancementCombobox("gChestSizeAndTextureMatchesContents", chestStyleMatchesContentsOptions, CSMC_DISABLED)) {
+                    if (CVarGetInteger("gChestSizeAndTextureMatchesContents", CSMC_DISABLED) == CSMC_DISABLED) {
+                        CVarSetInteger("gChestSizeDependsStoneOfAgony", 0);
+                    }
+                }
+                UIWidgets::Tooltip(
+                    "Chest sizes and textures are changed to help identify the item inside.\n"
+                    " - Major items: Large gold chests\n"
+                    " - Lesser items: Large brown chests\n"
+                    " - Junk items: Small brown chests\n"
+                    " - Small keys: Small silver chest\n"
+                    " - Boss keys: Vanilla size and texture\n"
+                    " - Skulltula Tokens: Small skulltula chest\n"
+                    "\n"
+                    "NOTE: Textures will not apply if you are using a mod pack with a custom chest model."
+                );
+                if (CVarGetInteger("gChestSizeAndTextureMatchesContents", CSMC_DISABLED) != CSMC_DISABLED) {
+                    UIWidgets::PaddedEnhancementCheckbox("Chests of Agony", "gChestSizeDependsStoneOfAgony", true, false);
+                    UIWidgets::Tooltip("Only change the size/texture of chests if you have the Stone of Agony.");
+                }
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementCheckbox("Display Enemy Health Bars", "gEnemyHealthBar", true, false);
+                UIWidgets::Tooltip("Renders a health bar for enemies when Z-Targeted");
+                UIWidgets::PaddedEnhancementCheckbox("Display Guards Vision", "gGuardVision", true, false);
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementCheckbox("Ask to Equip New Items", "gAskToEquip", true, false);
+                UIWidgets::Tooltip("Adds a prompt to equip newly-obtained swords, shields and tunics.");
+                UIWidgets::PaddedEnhancementCheckbox("Display Item Counts in Messages", "gInjectItemCounts", true, false);
+                UIWidgets::Tooltip("Injects item counts in pickup messages, like golden skulltula tokens and heart pieces.");
+                UIWidgets::PaddedEnhancementCheckbox("Don't Require Input for Credits Sequence", "gNoInputForCredits", true, false);
+                UIWidgets::Tooltip("Removes the input requirement on textboxes after defeating Ganon, allowing Credits sequence to continue to progress.");
+                UIWidgets::PaddedEnhancementCheckbox("Prevent Dropped Ocarina Inputs", "gDpadNoDropOcarinaInput", true, false);
+                UIWidgets::Tooltip("Prevent dropping inputs when playing the ocarina quickly.");
 
                 ImGui::EndMenu();
             }
 
             UIWidgets::Spacer(0);
+            UIWidgets::PaddedSeparator();
 
-            UIWidgets::EnhancementCheckbox("Visual Stone of Agony", "gVisualAgony");
-            UIWidgets::Tooltip("Displays an icon and plays a sound when Stone of Agony should be activated, for those without rumble");
-            UIWidgets::PaddedEnhancementCheckbox("Assignable Tunics and Boots", "gAssignableTunicsAndBoots", true, false);
-            UIWidgets::Tooltip("Allows equipping the tunic and boots to c-buttons");
-            UIWidgets::PaddedEnhancementCheckbox("Equipment Toggle", "gEquipmentCanBeRemoved", true, false);
-            UIWidgets::Tooltip("Allows equipment to be removed by toggling it off on\nthe equipment subscreen.");
-            UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
-            UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
-            UIWidgets::PaddedEnhancementCheckbox("Enable visible guard vision", "gGuardVision", true, false);
-            UIWidgets::PaddedEnhancementCheckbox("Enable passage of time on file select", "gTimeFlowFileSelect", true, false);
-            UIWidgets::PaddedEnhancementCheckbox("Item counts in messages", "gInjectItemCounts", true, false);
-            UIWidgets::Tooltip("Injects item counts in pickup messages, like golden skulltula tokens and heart pieces");
-            UIWidgets::PaddedEnhancementCheckbox("Pull grave during the day", "gDayGravePull", true, false);
-            UIWidgets::Tooltip("Allows graves to be pulled when child during the day");
-            UIWidgets::PaddedEnhancementCheckbox("Dogs follow you everywhere", "gDogFollowsEverywhere", true, false);
-            UIWidgets::Tooltip("Allows dogs to follow you anywhere you go, even if you leave the market");
-            UIWidgets::PaddedEnhancementCheckbox("Don't require input for Credits sequence", "gNoInputForCredits", true, false);
-            UIWidgets::Tooltip("Removes the input requirement on textboxes after defeating Ganon, allowing Credits sequence to continue to progress");
+            if (ImGui::BeginMenu("Bomb Tweaks"))
+            {
+                UIWidgets::PaddedEnhancementCheckbox("Deku Nut Flash Triggers Bombs", "gNutsExplodeBombs", true, false);
+                UIWidgets::Tooltip("Makes Deku Nuts explode Bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
+                UIWidgets::PaddedEnhancementCheckbox("Prevent Bombchus Forcing First-Person", "gDisableFirstPersonChus", true, false);
+                UIWidgets::Tooltip("Prevent Bombchus from forcing the camera into first-person mode when released.");
+                UIWidgets::PaddedEnhancementCheckbox("Disable Bomb Placement Limit", "gRemoveExplosiveLimit", true, false);
+                UIWidgets::Tooltip("Removes the cap of 3 active Bombs being deployed at once.");
+                UIWidgets::PaddedEnhancementCheckbox("Static Explosion Radius", "gStaticExplosionRadius", true, false);
+                UIWidgets::Tooltip("Explosions are now a static size, like in Majora's Mask and OoT3D. Makes bombchu hovering much easier.");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Item Drops"))
+            {
+                UIWidgets::PaddedEnhancementCheckbox("Disable Heart Drops", "gNoHeartDrops", true, false);
+                UIWidgets::Tooltip("Disables heart drops, but not heart placements, like from a Deku Scrub running off\nThis simulates Hero Mode from other games in the series");
+                UIWidgets::PaddedEnhancementCheckbox("Disable Random Drops", "gNoRandomDrops", true, false);
+                UIWidgets::Tooltip("Disables random drops, except from the Goron Pot, Dampe, and bosses");
+
+                bool forceEnableBombchuDrops = IS_RANDO &&
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_ENABLE_BOMBCHU_DROPS) == 1;
+                static const char* forceEnableBombchuDropsText =
+                    "This setting is forcefully enabled because a savefile\nwith \"Enable Bombchu Drops\" is loaded.";
+                UIWidgets::PaddedEnhancementCheckbox("Random Bombchu Drops", "gBombchuDrops", true, false,
+                                                        forceEnableBombchuDrops, forceEnableBombchuDropsText, UIWidgets::CheckboxGraphics::Checkmark);
+                UIWidgets::Tooltip("Bombchus will sometimes drop in place of Bombs.");
+                UIWidgets::PaddedEnhancementCheckbox("Trees Drop Sticks", "gTreeStickDrops", true, false);
+                UIWidgets::Tooltip("Bonking into trees will have a chance to drop up to 3 sticks. Must already have obtained sticks.");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Potion Effects"))
+            {
+                UIWidgets::EnhancementCheckbox("Change Red Potion Effect", "gRedPotionEffect");
+                UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Red Potions");
+                bool disabledRedPotion = !CVarGetInteger("gRedPotionEffect", 0);
+                static const char* disabledTooltipRedPotion = "This option is disabled because \"Change Red Potion Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Red Potion Health: %d", "##REDPOTIONHEALTH", "gRedPotionHealth", 1, 100, "", 0, true, disabledRedPotion, disabledTooltipRedPotion);
+                UIWidgets::Tooltip("Changes the amount of health restored by Red Potions");
+                UIWidgets::EnhancementCheckbox("Red Potion Percent Restore", "gRedPercentRestore", disabledRedPotion, disabledTooltipRedPotion);
+                UIWidgets::Tooltip("Toggles from Red Potions restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Change Green Potion Effect", "gGreenPotionEffect");
+                UIWidgets::Tooltip("Enable the following changes to the amount of mana restored by Green Potions");
+                bool disabledGreenPotion = !CVarGetInteger("gGreenPotionEffect", 0);
+                static const char* disabledTooltipGreenPotion = "This option is disabled because \"Change Green Potion Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Green Potion Mana: %d", "##GREENPOTIONMANA", "gGreenPotionMana", 1, 100, "", 0, true, disabledGreenPotion, disabledTooltipGreenPotion);
+                UIWidgets::Tooltip("Changes the amount of mana restored by Green Potions, base max mana is 48, max upgraded mana is 96");
+                UIWidgets::EnhancementCheckbox("Green Potion Percent Restore", "gGreenPercentRestore", disabledGreenPotion, disabledTooltipGreenPotion);
+                UIWidgets::Tooltip("Toggles from Green Potions restoring a fixed amount of mana to a percent of the player's current max mana");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Change Blue Potion Effects", "gBluePotionEffects");
+                UIWidgets::Tooltip("Enable the following changes to the amount of health and mana restored by Blue Potions");
+                bool disabledBluePotion = !CVarGetInteger("gBluePotionEffects", 0);
+                static const char* disabledTooltipBluePotion = "This option is disabled because \"Change Blue Potion Effects\" is turned off";
+                UIWidgets::EnhancementSliderInt("Blue Potion Health: %d", "##BLUEPOTIONHEALTH", "gBluePotionHealth", 1, 100, "", 0, true, disabledBluePotion, disabledTooltipBluePotion);
+                UIWidgets::Tooltip("Changes the amount of health restored by Blue Potions");
+                UIWidgets::EnhancementCheckbox("Blue Potion Health Percent Restore", "gBlueHealthPercentRestore", disabledBluePotion, disabledTooltipBluePotion);
+                UIWidgets::Tooltip("Toggles from Blue Potions restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementSliderInt("Blue Potion Mana: %d", "##BLUEPOTIONMANA", "gBluePotionMana", 1, 100, "", 0, true, disabledBluePotion, disabledTooltipBluePotion);
+                UIWidgets::Tooltip("Changes the amount of mana restored by Blue Potions, base max mana is 48, max upgraded mana is 96");
+                UIWidgets::EnhancementCheckbox("Blue Potion Mana Percent Restore", "gBlueManaPercentRestore", disabledBluePotion, disabledTooltipBluePotion);
+                UIWidgets::Tooltip("Toggles from Blue Potions restoring a fixed amount of mana to a percent of the player's current max mana");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Change Milk Effect", "gMilkEffect");
+                UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Milk");
+                bool disabledMilk = !CVarGetInteger("gMilkEffect", 0);
+                static const char* disabledTooltipMilk = "This option is disabled because \"Change Milk Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Milk Health: %d", "##MILKHEALTH", "gMilkHealth", 1, 100, "", 0, true, disabledMilk, disabledTooltipMilk);
+                UIWidgets::Tooltip("Changes the amount of health restored by Milk");
+                UIWidgets::EnhancementCheckbox("Milk Percent Restore", "gMilkPercentRestore", disabledMilk, disabledTooltipMilk);
+                UIWidgets::Tooltip("Toggles from Milk restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Separate Half Milk Effect", "gSeparateHalfMilkEffect", disabledMilk, disabledTooltipMilk);
+                UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Half Milk\nIf this is disabled, Half Milk will behave the same as Full Milk.");
+                bool disabledHalfMilk = disabledMilk || !CVarGetInteger("gSeparateHalfMilkEffect", 0);
+                static const char* disabledTooltipHalfMilk = "This option is disabled because \"Separate Half Milk Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Half Milk Health: %d", "##HALFMILKHEALTH", "gHalfMilkHealth", 1, 100, "", 0, true, disabledHalfMilk, disabledTooltipHalfMilk);
+                UIWidgets::Tooltip("Changes the amount of health restored by Half Milk");
+                UIWidgets::EnhancementCheckbox("Half Milk Percent Restore", "gHalfMilkPercentRestore", disabledHalfMilk, disabledTooltipHalfMilk);
+                UIWidgets::Tooltip("Toggles from Half Milk restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Change Fairy Effect", "gFairyEffect");
+                UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Fairies");
+                bool disabledFairy = !CVarGetInteger("gFairyEffect", 0);
+                static const char* disabledTooltipFairy = "This option is disabled because \"Change Fairy Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Fairy: %d", "##FAIRYHEALTH", "gFairyHealth", 1, 100, "", 0, true, disabledFairy, disabledTooltipFairy);
+                UIWidgets::Tooltip("Changes the amount of health restored by Fairies");
+                UIWidgets::EnhancementCheckbox("Fairy Percent Restore", "gFairyPercentRestore", disabledFairy, disabledTooltipFairy);
+                UIWidgets::Tooltip("Toggles from Fairies restoring a fixed amount of health to a percent of the player's current max health");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Change Fairy Revive Effect", "gFairyReviveEffect");
+                UIWidgets::Tooltip("Enable the following changes to the amount of health restored by Fairy Revivals");
+                bool disabledFairyRevive = !CVarGetInteger("gFairyReviveEffect", 0);
+                static const char* disabledTooltipFairyRevive = "This option is disabled because \"Change Fairy Revive Effect\" is turned off";
+                UIWidgets::EnhancementSliderInt("Fairy Revival: %d", "##FAIRYREVIVEHEALTH", "gFairyReviveHealth", 1, 100, "", 0, true, disabledFairyRevive, disabledTooltipFairyRevive);
+                UIWidgets::Tooltip("Changes the amount of health restored by Fairy Revivals");
+                UIWidgets::EnhancementCheckbox("Fairy Revive Percent Restore", "gFairyRevivePercentRestore", disabledFairyRevive, disabledTooltipFairyRevive);
+                UIWidgets::Tooltip("Toggles from Fairy Revivals restoring a fixed amount of health to a percent of the player's current max health");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementCheckbox("Timeless Equipment", "gTimelessEquipment", true, false);
+            UIWidgets::Tooltip("Allows any item to be equipped, regardless of age.\nAlso allows young Link to use adult strength upgrades");
+            UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false, (CVarGetInteger("gTimelessEquipment", 0) == 0), "Requires Timeless Equipment", UIWidgets::CheckboxGraphics::Cross, false);
+            UIWidgets::Tooltip("Allows child to use Bow with arrows.\nAllows adult to use Slingshot with seeds.");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedText("Bunny Hood Effect", true, false);
+            UIWidgets::EnhancementCombobox("gMMBunnyHood", bunnyHoodOptions, BUNNY_HOOD_VANILLA);
+            UIWidgets::Tooltip(
+                "Wearing the Bunny Hood grants a speed increase like in Majora's Mask. The longer jump option is not accounted for in randomizer logic.\n\n"
+                "Also disables NPC's reactions to wearing the Bunny Hood."
+            );
+            UIWidgets::PaddedEnhancementCheckbox("Bunny Hood Equippable as Adult", "gAdultBunnyHood", true, false, (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) == BUNNY_HOOD_VANILLA), "Only available with increased bunny hood speed", UIWidgets::CheckboxGraphics::Cross, false);
+            UIWidgets::Tooltip("Allows the bunny hood to be equipped normally from the pause menu as adult.");
+            UIWidgets::PaddedEnhancementCheckbox("Invisible Bunny Hood", "gHideBunnyHood", true, false);
+            UIWidgets::Tooltip("Turns Bunny Hood invisible while still maintaining its effects.");
+            UIWidgets::PaddedSeparator();
 
             // Blue Fire Arrows
             bool forceEnableBlueFireArrows = IS_RANDO &&
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_BLUE_FIRE_ARROWS);
             static const char* forceEnableBlueFireArrowsText =
                 "This setting is forcefully enabled because a savefile\nwith \"Blue Fire Arrows\" is loaded.";
-            UIWidgets::PaddedEnhancementCheckbox("Blue Fire Arrows", "gBlueFireArrows", true, false, 
+            UIWidgets::PaddedEnhancementCheckbox("Blue Fire Arrows", "gBlueFireArrows", true, false,
                 forceEnableBlueFireArrows, forceEnableBlueFireArrowsText, UIWidgets::CheckboxGraphics::Checkmark);
             UIWidgets::Tooltip("Allows Ice Arrows to melt red ice.\nMay require a room reload if toggled during gameplay.");
 
@@ -887,18 +894,36 @@ void DrawEnhancementsMenu() {
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SUNLIGHT_ARROWS);
             static const char* forceEnableSunLightArrowsText =
                 "This setting is forcefully enabled because a savefile\nwith \"Sunlight Arrows\" is loaded.";
-            UIWidgets::PaddedEnhancementCheckbox("Sunlight Arrows", "gSunlightArrows", true, false, 
+            UIWidgets::PaddedEnhancementCheckbox("Sunlight Arrows", "gSunlightArrows", true, false,
                 forceEnableSunLightArrows, forceEnableSunLightArrowsText, UIWidgets::CheckboxGraphics::Checkmark);
             UIWidgets::Tooltip("Allows Light Arrows to activate sun switches.\nMay require a room reload if toggled during gameplay.");
+            UIWidgets::PaddedSeparator();
 
-            UIWidgets::PaddedEnhancementCheckbox("Disable Crit wiggle", "gDisableCritWiggle", true, false);
-            UIWidgets::Tooltip("Disable random camera wiggle at low health");
-            UIWidgets::PaddedEnhancementCheckbox("Enemy Health Bars", "gEnemyHealthBar", true, false);
-            UIWidgets::Tooltip("Renders a health bar for enemies when Z-Targeted");
+            UIWidgets::PaddedEnhancementCheckbox("Dampe Appears All Night", "gDampeAllNight", true, false);
+            UIWidgets::Tooltip("Makes Dampe appear anytime during the night, not just his usual working hours.");
+            UIWidgets::PaddedEnhancementCheckbox("Dogs Follow You Everywhere", "gDogFollowsEverywhere", true, false);
+            UIWidgets::Tooltip("Allows dogs to follow you anywhere you go, even if you leave the market");
+            UIWidgets::PaddedEnhancementCheckbox("Exit the Market at Night", "gMarketSneak", true, false);
+            UIWidgets::Tooltip("Allows exiting Hyrule Castle Market Town to Hyrule Field at night by speaking "
+            "to the guard next to the gate.");
+            UIWidgets::PaddedEnhancementCheckbox("Gold Skulltulas During the Day", "gNightGSAlwaysSpawn", true, false);
+            UIWidgets::Tooltip("Nighttime Skulltulas will spawn during both day and night.");
+            UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
+            UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
+            UIWidgets::PaddedEnhancementCheckbox("Pull Graves During the Day", "gDayGravePull", true, false);
+            UIWidgets::Tooltip("Allows graves to be pulled when child during the day");
+            UIWidgets::PaddedSeparator();
 
-            UIWidgets::PaddedEnhancementCheckbox("Targetable Hookshot Reticle", "gHookshotableReticle", true, false);
-            UIWidgets::Tooltip("Use a different color when aiming at hookshotable collision");
-
+            UIWidgets::PaddedText("Time Travel with the Song of Time", true, false);
+            UIWidgets::EnhancementCombobox("gTimeTravel", timeTravelOptions, 0);
+            UIWidgets::Tooltip("Allows Link to freely change age by playing the Song of Time.\n"
+                "Time Blocks can still be used properly.\n\n"
+                "Requirements:\n"
+                "- Obtained the Ocarina of Time (depends on selection)\n"
+                "- Obtained the Song of Time\n"
+                "- Obtained the Master Sword\n"
+                "- Not within range of Time Block\n"
+                "- Not within range of Ocarina playing spots");
             ImGui::EndMenu();
         }
 
@@ -915,15 +940,15 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Disables bombs always rotating to face the camera. To be used in conjunction with mods that want to replace bombs with 3D objects.");
                 UIWidgets::PaddedEnhancementCheckbox("Disable Grotto Fixed Rotation", "gDisableGrottoRotation", true, false);
                 UIWidgets::Tooltip("Disables grottos rotating with the camera. To be used in conjunction with mods that want to replace grottos with 3D objects.");
-                UIWidgets::PaddedEnhancementCheckbox("Invisible Bunny Hood", "gHideBunnyHood", true, false);
-                UIWidgets::Tooltip("Turns Bunny Hood invisible while still maintaining its effects.");
                 UIWidgets::PaddedEnhancementCheckbox("Disable HUD Heart animations", "gNoHUDHeartAnimation", true, false);
                 UIWidgets::Tooltip("Disables the beating animation of the hearts on the HUD.");
-
                 ImGui::EndMenu();
             }
-            UIWidgets::PaddedEnhancementCheckbox("Disable LOD", "gDisableLOD", true, false);
-            UIWidgets::Tooltip("Turns off the Level of Detail setting, making models use their higher-poly variants at any distance");
+
+            UIWidgets::PaddedEnhancementCheckbox("N64 Mode", "gLowResMode", true, false);
+            UIWidgets::Tooltip("Sets aspect ratio to 4:3 and lowers resolution to 240p, the N64's native resolution");
+            UIWidgets::PaddedSeparator();
+
             if (UIWidgets::PaddedEnhancementCheckbox("Disable Draw Distance", "gDisableDrawDistance", true, false)) {
                 if (CVarGetInteger("gDisableDrawDistance", 0) == 0) {
                     CVarSetInteger("gDisableKokiriDrawDistance", 0);
@@ -931,24 +956,71 @@ void DrawEnhancementsMenu() {
             }
             UIWidgets::Tooltip("Turns off the objects draw distance, making objects being visible from a longer range");
             if (CVarGetInteger("gDisableDrawDistance", 0) == 1) {
-                UIWidgets::PaddedEnhancementCheckbox("Kokiri Draw Distance", "gDisableKokiriDrawDistance", true, false);
+                UIWidgets::PaddedEnhancementCheckbox("Disable Kokiri Draw Distance", "gDisableKokiriDrawDistance", true, false);
                 UIWidgets::Tooltip("The Kokiri are mystical beings that fade into view when approached\nEnabling this will remove their draw distance");
             }
-            UIWidgets::PaddedEnhancementCheckbox("N64 Mode", "gLowResMode", true, false);
-            UIWidgets::Tooltip("Sets aspect ratio to 4:3 and lowers resolution to 240p, the N64's native resolution");
-            UIWidgets::PaddedEnhancementCheckbox("Glitch line-up tick", "gDrawLineupTick", true, false);
-            UIWidgets::Tooltip("Displays a tick in the top center of the screen to help with glitch line-ups in SoH, as traditional UI based line-ups do not work outside of 4:3");
-            UIWidgets::PaddedEnhancementCheckbox("Enable 3D Dropped items/projectiles", "gNewDrops", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Disable LOD", "gDisableLOD", true, false);
+            UIWidgets::Tooltip("Turns off the Level of Detail setting, making models use their higher-poly variants at any distance");
+            UIWidgets::PaddedEnhancementCheckbox("Enable 3D Dropped Items/Projectiles", "gNewDrops", true, false);
             UIWidgets::Tooltip("Change most 2D items and projectiles on the overworld to their 3D versions");
-            UIWidgets::PaddedEnhancementCheckbox("Disable Black Bar Letterboxes", "gDisableBlackBars", true, false);
-            UIWidgets::Tooltip("Disables Black Bar Letterboxes during cutscenes and Z-targeting\nNote: there may be minor visual glitches that were covered up by the black bars\nPlease disable this setting before reporting a bug");
-            UIWidgets::PaddedEnhancementCheckbox("Dynamic Wallet Icon", "gDynamicWalletIcon", true, false);
-            UIWidgets::Tooltip("Changes the rupee in the wallet icon to match the wallet size you currently have");
-            UIWidgets::PaddedEnhancementCheckbox("Always show dungeon entrances", "gAlwaysShowDungeonMinimapIcon", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Enable Two-Handed Idle Animations", "gTwoHandedIdle", true, false);
+            UIWidgets::Tooltip("Re-enables the two-handed idle animation, a seemingly finished animation that was disabled on accident in the original game");
+
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedText("Fix Vanishing Paths", true, false);
+            if (UIWidgets::EnhancementCombobox("gSceneSpecificDirtPathFix", zFightingOptions, ZFIGHT_FIX_DISABLED) && gPlayState != NULL) {
+                UpdateDirtPathFixState(gPlayState->sceneNum);
+            }
+            UIWidgets::Tooltip("Disabled: Paths vanish more the higher the resolution (Z-fighting is based on resolution)\n"
+                                "Consistent: Certain paths vanish the same way in all resolutions\n"
+                                "No Vanish: Paths do not vanish, Link seems to sink in to some paths\n"
+                                "This might affect other decal effects\n");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementSliderInt("Text Spacing: %d", "##TEXTSPACING", "gTextSpacing", 4, 6, "", 6, true, true, true);
+            UIWidgets::Tooltip("Space between text characters (useful for HD font textures)");
+            ImGui::EndMenu();
+        }
+
+        UIWidgets::Spacer(0);
+
+        if (ImGui::BeginMenu("HUD"))
+        {
+            UIWidgets::PaddedEnhancementCheckbox("Minimal UI", "gMinimalUI", true, false);
+            UIWidgets::Tooltip("Hides most of the UI when not needed\nNote: Doesn't activate until after loading a new scene");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementCheckbox("Always Show Dungeon Entrances", "gAlwaysShowDungeonMinimapIcon", true, false);
             UIWidgets::Tooltip("Always shows dungeon entrance icons on the minimap");
-            UIWidgets::PaddedEnhancementCheckbox("Show Gauntlets in First Person", "gFPSGauntlets", true, false);
-            UIWidgets::Tooltip("Renders Gauntlets when using the Bow and Hookshot like in OOT3D");
-            UIWidgets::Spacer(0);
+            UIWidgets::PaddedEnhancementCheckbox("Display Dynamic Wallet Icon", "gDynamicWalletIcon", true, false);
+            UIWidgets::Tooltip("Changes the rupee in the wallet icon to match the wallet size you currently have");
+            UIWidgets::PaddedEnhancementCheckbox("Display Glitch Line-up Tick", "gDrawLineupTick", true, false);
+            UIWidgets::Tooltip("Displays a tick in the top center of the screen to help with glitch line-ups in SoH, as traditional UI based line-ups do not work outside of 4:3");
+            UIWidgets::EnhancementCheckbox("Display Visual Stone of Agony", "gVisualAgony");
+            UIWidgets::Tooltip("Displays an icon and plays a sound when Stone of Agony should be activated, for those without rumble");
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::PaddedEnhancementCheckbox("Disable Hot/Underwater Warning Text", "gDisableTunicWarningText", true, false);
+            UIWidgets::Tooltip("Disables warning text when you don't have on the Goron/Zora Tunic in Hot/Underwater conditions.");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Dungeon Entrances on HUD", "gFixDungeonMinimapIcon", true, false);
+            UIWidgets::Tooltip("Removes the dungeon entrance icon on the top-left corner of the screen when no dungeon is present on the current map");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Navi Text HUD position", "gNaviTextFix", true, false);
+            UIWidgets::Tooltip("Correctly centers the Navi text prompt on the HUD's C-Up button");
+            ImGui::EndMenu();
+        }
+
+        UIWidgets::Spacer(0);
+
+        if (ImGui::BeginMenu("Menus"))
+        {
+            UIWidgets::PaddedEnhancementCheckbox("Link as Default Filename", "gLinkDefaultName", true, false);
+            UIWidgets::Tooltip("Allows you to have \"Link\" as a premade filename.");
+            UIWidgets::PaddedEnhancementCheckbox("More Info on File Select", "gFileSelectMoreInfo", true, false);
+            UIWidgets::Tooltip("Shows what items you have collected in the file select screen, like in N64 randomizer");
+            UIWidgets::PaddedEnhancementCheckbox("Passage of Time on File Select", "gTimeFlowFileSelect", true, false);
+            UIWidgets::PaddedSeparator();
+
             if (ImGui::BeginMenu("Animated Link in Pause Menu")) {
                 ImGui::Text("Rotation");
                 UIWidgets::EnhancementRadioButton("Disabled", "gPauseLiveLinkRotation", 0);
@@ -989,84 +1061,27 @@ void DrawEnhancementsMenu() {
                 if (CVarGetInteger("gPauseLiveLink", 0) >= 16) {
                     UIWidgets::EnhancementSliderInt("Frame to wait: %d", "##MinFrameCount", "gMinFrameCount", 1, 1000, "", 0);
                 }
-
                 ImGui::EndMenu();
             }
-            UIWidgets::PaddedText("Fix Vanishing Paths", true, false);
-            if (UIWidgets::EnhancementCombobox("gSceneSpecificDirtPathFix", zFightingOptions, ZFIGHT_FIX_DISABLED) && gPlayState != NULL) {
-                UpdateDirtPathFixState(gPlayState->sceneNum);
-            }
-            UIWidgets::Tooltip("Disabled: Paths vanish more the higher the resolution (Z-fighting is based on resolution)\n"
-                                "Consistent: Certain paths vanish the same way in all resolutions\n"
-                                "No Vanish: Paths do not vanish, Link seems to sink in to some paths\n"
-                                "This might affect other decal effects\n");
-            UIWidgets::PaddedEnhancementSliderInt("Text Spacing: %d", "##TEXTSPACING", "gTextSpacing", 4, 6, "", 6, true, true, true);
-            UIWidgets::Tooltip("Space between text characters (useful for HD font textures)");
-            UIWidgets::PaddedEnhancementCheckbox("More info in file select", "gFileSelectMoreInfo", true, false);
-            UIWidgets::Tooltip("Shows what items you have collected in the file select screen, like in N64 randomizer");
-            ImGui::EndMenu();
-        }
 
-        UIWidgets::Spacer(0);
+            UIWidgets::Spacer(0);
+            UIWidgets::PaddedSeparator();
 
-        if (ImGui::BeginMenu("Fixes"))
-        {
-            UIWidgets::EnhancementCheckbox("Fix L&R Pause menu", "gUniformLR");
+            UIWidgets::PaddedEnhancementCheckbox("Assignable Tunics and Boots", "gAssignableTunicsAndBoots", true, false);
+            UIWidgets::Tooltip("Allows equipping the tunic and boots to C-buttons");
+            UIWidgets::PaddedEnhancementCheckbox("Removable Tunics and Boots", "gEquipmentCanBeRemoved", true, false);
+            UIWidgets::Tooltip("Allows equipment to be unequipped via the Equipment Subscreen.");
+            UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
+            UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
+            UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
+            UIWidgets::Tooltip("Allow the Bow and magic arrows to be equipped at the same time on different slots");
+            UIWidgets::PaddedEnhancementCheckbox("Skip Magic Arrow Equip Animation", "gSkipArrowAnimation", true, false);
+            UIWidgets::PaddedSeparator();
+
+            UIWidgets::EnhancementCheckbox("Fix L&R Pause Menu", "gUniformLR");
             UIWidgets::Tooltip("Makes the L and R buttons in the pause menu the same color");
-            UIWidgets::PaddedEnhancementCheckbox("Fix L&Z Page switch in Pause menu", "gNGCKaleidoSwitcher", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Fix L&Z Page Switch in Pause Menu", "gNGCKaleidoSwitcher", true, false);
             UIWidgets::Tooltip("Makes L and R switch pages like on the GameCube\nZ opens the Debug Menu instead");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Dungeon entrances", "gFixDungeonMinimapIcon", true, false);
-            UIWidgets::Tooltip("Removes the dungeon entrance icon on the top-left corner of the screen when no dungeon is present on the current map");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Two Handed idle animations", "gTwoHandedIdle", true, false);
-            UIWidgets::Tooltip("Re-enables the two-handed idle animation, a seemingly finished animation that was disabled on accident in the original game");
-            UIWidgets::PaddedEnhancementCheckbox("Fix the Gravedigging Tour Glitch", "gGravediggingTourFix", true, false);
-            UIWidgets::Tooltip("Fixes a bug where the Gravedigging Tour Heart Piece disappears if the area reloads");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Deku Nut upgrade", "gDekuNutUpgradeFix", true, false);
-            UIWidgets::Tooltip("Prevents the Forest Stage Deku Nut upgrade from becoming unobtainable after receiving the Poacher's Saw");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Navi text HUD position", "gNaviTextFix", true, false);
-            UIWidgets::Tooltip("Correctly centers the Navi text prompt on the HUD's C-Up button");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Anubis fireballs", "gAnubisFix", true, false);
-            UIWidgets::Tooltip("Make Anubis fireballs do fire damage when reflected back at them with the Mirror Shield");
-            if (UIWidgets::PaddedEnhancementCheckbox("Fix Megaton Hammer crouch stab", "gCrouchStabHammerFix", true, false)) {
-                if (!CVarGetInteger("gCrouchStabHammerFix", 0)) {
-                    CVarClear("gCrouchStabFix");
-                }
-            }
-            UIWidgets::Tooltip("Make the Megaton Hammer's crouch stab able to destroy rocks without first swinging it normally");
-            if (CVarGetInteger("gCrouchStabHammerFix", 0)) {
-                UIWidgets::PaddedEnhancementCheckbox("Remove power crouch stab", "gCrouchStabFix", true, false);
-                UIWidgets::Tooltip("Make crouch stabbing always do the same damage as a regular slash");
-            }
-            UIWidgets::PaddedEnhancementCheckbox("Fix credits timing", "gCreditsFix", true, false);
-            UIWidgets::Tooltip("Extend certain credits scenes so the music lines up properly with the visuals");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Gerudo Warrior's clothing colors", "gGerudoWarriorClothingFix", true, false);
-            UIWidgets::Tooltip("Prevent the Gerudo Warrior's clothes changing color when changing Link's tunic or using bombs in front of her");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Camera Drift", "gFixCameraDrift", true, false);
-            UIWidgets::Tooltip("Fixes camera slightly drifting to the left when standing still due to a math error");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Camera Swing", "gFixCameraSwing", true, false);
-            UIWidgets::Tooltip("Fixes camera getting stuck on collision when standing still, also fixes slight shift back in camera when stop moving");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Hanging Ledge Swing Rate", "gFixHangingLedgeSwingRate", true, false);
-            UIWidgets::Tooltip("Fixes camera swing rate when player falls off a ledge and camera swings around");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Missing Jingle after 5 Silver Rupees", "gSilverRupeeJingleExtend", true, false);
-            UIWidgets::Tooltip(
-                "Adds 5 higher pitches for the Silver Rupee Jingle for the rooms with more than 5 Silver Rupees. "
-                "Currently only relevant in Master Quest.");
-            if (UIWidgets::PaddedEnhancementCheckbox("Fix out of bounds textures", "gFixTexturesOOB", true, false)) {
-                ApplyAuthenticGfxPatches();
-            }
-            UIWidgets::Tooltip("Fixes authentic out of bounds texture reads, instead loading textures with the correct size");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Poacher's Saw Softlock", "gFixSawSoftlock", true, false, CVarGetInteger("gSkipText", 0),
-                "This is disabled because it is forced on when Skip Text is enabled.", UIWidgets::CheckboxGraphics::Checkmark);
-            UIWidgets::Tooltip("Prevents the Poacher's Saw softlock from mashing through the text, or with Skip Text enabled.");
-            UIWidgets::PaddedEnhancementCheckbox("Fix enemies not spawning near water", "gEnemySpawnsOverWaterboxes", true, false);
-            UIWidgets::Tooltip("Causes respawning enemies, like stalchildren, to appear on land near bodies of water. "
-                                "Fixes an incorrect calculation that acted like water underneath ground was above it.");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Bush Item Drops", "gBushDropFix", true, false);
-            UIWidgets::Tooltip("Fixes the bushes to drop items correctly rather than spawning undefined items.");
-            UIWidgets::PaddedEnhancementCheckbox("Fix falling from vine edges", "gFixVineFall", true, false); 
-            UIWidgets::Tooltip("Prevents immediately falling off climbable surfaces if climbing on the edges."); 
-            UIWidgets::PaddedEnhancementCheckbox("Fix Link's eyes open while sleeping", "gFixEyesOpenWhileSleeping", true, false);
-            UIWidgets::Tooltip("Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping.");
 
             ImGui::EndMenu();
         }
@@ -1077,17 +1092,17 @@ void DrawEnhancementsMenu() {
         {
             UIWidgets::EnhancementCheckbox("Authentic Logo Screen", "gAuthenticLogo");
             UIWidgets::Tooltip("Hide the game version and build details and display the authentic model and texture on the boot logo start screen");
-            UIWidgets::PaddedEnhancementCheckbox("Red Ganon blood", "gRedGanonBlood", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Red Ganon Blood", "gRedGanonBlood", true, false);
             UIWidgets::Tooltip("Restore the original red blood from NTSC 1.0/1.1. Disable for green blood");
-            UIWidgets::PaddedEnhancementCheckbox("Fish while hovering", "gHoverFishing", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Fish While Hovering", "gHoverFishing", true, false);
             UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows casting the Fishing Rod while using the Hover Boots");
             UIWidgets::PaddedEnhancementCheckbox("N64 Weird Frames", "gN64WeirdFrames", true, false);
             UIWidgets::Tooltip("Restores N64 Weird Frames allowing weirdshots to behave the same as N64");
-            UIWidgets::PaddedEnhancementCheckbox("Bombchus out of bounds", "gBombchusOOB", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Bombchus Out of Bounds", "gBombchusOOB", true, false);
             UIWidgets::Tooltip("Allows bombchus to explode out of bounds\nSimilar to GameCube and Wii VC");
             UIWidgets::PaddedEnhancementCheckbox("Quick Putaway", "gQuickPutaway", true, false);
             UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing Putaway Ocarina Items");
-            UIWidgets::PaddedEnhancementCheckbox("Restore old Gold Skulltula cutscene", "gGsCutscene", true, false);
+            UIWidgets::PaddedEnhancementCheckbox("Restore Old Gold Skulltula Cutscene", "gGsCutscene", true, false);
             UIWidgets::PaddedEnhancementCheckbox("Quick Bongo Kill", "gQuickBongoKill", true, false);
             UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows bypassing Bongo Bongo's intro cutscene to quickly kill him");
             UIWidgets::PaddedEnhancementCheckbox("Original RBA Values", "gRestoreRBAValues", true, false);
@@ -1097,6 +1112,7 @@ void DrawEnhancementsMenu() {
         }
 
         UIWidgets::Spacer(0);
+        UIWidgets::PaddedSeparator();
 
         if (ImGui::BeginMenu("Extra Modes")) {
         #ifdef ENABLE_CROWD_CONTROL
@@ -1192,6 +1208,7 @@ void DrawEnhancementsMenu() {
             ImGui::EndMenu();
         }
 
+        UIWidgets::Spacer(0);
         UIWidgets::PaddedSeparator(false, true);
 
         // Autosave enum value of 1 is the default in presets and the old checkbox "on" state for backwards compatibility
@@ -1250,9 +1267,79 @@ void DrawCheatsMenu() {
             UIWidgets::PaddedEnhancementCheckbox("Magic", "gInfiniteMagic", true, false);
             UIWidgets::PaddedEnhancementCheckbox("Nayru's Love", "gInfiniteNayru", true, false);
             UIWidgets::PaddedEnhancementCheckbox("Epona Boost", "gInfiniteEpona", true, false);
+            ImGui::EndMenu();
+        }
+
+        UIWidgets::Spacer(0);
+
+        if (ImGui::BeginMenu("Mini-Games")) {
+
+            if (ImGui::BeginMenu("Shooting Gallery")) {
+                UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeShootingGallery");
+                UIWidgets::Tooltip("Turn on/off changes to the shooting gallery behavior");
+                bool disabled = !CVarGetInteger("gCustomizeShootingGallery", 0);
+                static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
+                UIWidgets::PaddedEnhancementCheckbox("Instant Win", "gInstantShootingGalleryWin", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("Skips the shooting gallery minigame");
+                UIWidgets::PaddedEnhancementCheckbox("No Rupee Randomization", "gConstantAdultGallery", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("Forces the rupee order to not be randomized as adult, making it the same as chlid");
+                UIWidgets::PaddedEnhancementSliderInt("Child Starting Ammunition: %d", "##cShootingGalleryAmmunition", "gChildShootingGalleryAmmunition", 10, 30, "", 15, true, true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("The ammunition at the start of the shooting gallery minigame as a child");
+                UIWidgets::PaddedEnhancementSliderInt("Adult Starting Ammunition: %d", "##aShootingGalleryAmmunition", "gAdultShootingGalleryAmmunition", 10, 30, "", 15, true, true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("The ammunition at the start of the shooting gallery minigame as an adult");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Bombchu Bowling")) {
+                UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeBombchuBowling");
+                UIWidgets::Tooltip("Turn on/off changes to the bombchu bowling behavior");
+                bool disabled = CVarGetInteger("gCustomizeBombchuBowling", 0) == 0;
+                static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
+                UIWidgets::PaddedEnhancementCheckbox("Remove Small Cucco", "gBombchuBowlingNoSmallCucco", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("Prevents the small cucco from appearing in the bombchu bowling minigame");
+                UIWidgets::PaddedEnhancementCheckbox("Remove Big Cucco", "gBombchuBowlingNoBigCucco", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("Prevents the big cucco from appearing in the bombchu bowling minigame");
+                UIWidgets::PaddedEnhancementSliderInt("Bombchu Count: %d", "##cBombchuBowlingAmmunition", "gBombchuBowlingAmmunition", 3, 20, "", 10, true, true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("The number of bombchus available at the start of the bombchu bowling minigame");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Fishing")) {
+                UIWidgets::EnhancementCheckbox("Customize Behavior", "gCustomizeFishing");
+                UIWidgets::Tooltip("Turn on/off changes to the fishing behavior");
+                bool disabled = !CVarGetInteger("gCustomizeFishing", 0);
+                static const char* disabledTooltip = "This option is disabled because \"Customize Behavior\" is turned off";
+                UIWidgets::PaddedEnhancementCheckbox("Instant Fishing", "gInstantFishing", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("All fish will be caught instantly");
+                UIWidgets::PaddedEnhancementCheckbox("Guarantee Bite", "gGuaranteeFishingBite", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("When a line is stable, guarantee bite. Otherwise use default logic");
+                UIWidgets::PaddedEnhancementCheckbox("Fish Never Escape", "gFishNeverEscape", true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("Once a hook has been set, fish will never let go while being reeled in.");
+                UIWidgets::PaddedEnhancementSliderInt("Child Minimum Weight: %d", "##cMinimumWeight", "gChildMinimumWeightFish", 3, 10, "", 10, true, true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("The minimum weight for the unique fishing reward as a child");
+                UIWidgets::PaddedEnhancementSliderInt("Adult Minimum Weight: %d", "##aMinimumWeight", "gAdultMinimumWeightFish", 6, 13, "", 13, true, true, false, disabled, disabledTooltip);
+                UIWidgets::Tooltip("The minimum weight for the unique fishing reward as an adult");
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            UIWidgets::PaddedEnhancementCheckbox("Always Win Goron Pot", "gGoronPot", true, false);
+            UIWidgets::Tooltip("Always get the heart piece/purple rupee from the spinning Goron pot");
+            UIWidgets::PaddedEnhancementCheckbox("Always Win Dampe Digging Game", "gDampeWin", true, false, SaveManager::Instance->IsRandoFile(),
+                                                    "This setting is always enabled in randomizer files", UIWidgets::CheckboxGraphics::Checkmark);
+            UIWidgets::Tooltip("Always win the heart piece/purple rupee on the first dig in Dampe's grave digging game, just like in rando\nIn a rando file, this is unconditionally enabled");
+            UIWidgets::PaddedEnhancementCheckbox("All Dogs are Richard", "gAllDogsRichard", true, false);
+            UIWidgets::Tooltip("All dogs can be traded in and will count as Richard.");
 
             ImGui::EndMenu();
         }
+
+        UIWidgets::Spacer(0);
 
         UIWidgets::PaddedEnhancementCheckbox("No Clip", "gNoClip", true, false);
         UIWidgets::Tooltip("Allows you to walk through walls");
@@ -1260,7 +1347,7 @@ void DrawCheatsMenu() {
         UIWidgets::Tooltip("Makes every surface in the game climbable");
         UIWidgets::PaddedEnhancementCheckbox("Hookshot Everything", "gHookshotEverything", true, false);
         UIWidgets::Tooltip("Makes every surface in the game hookshot-able");
-        UIWidgets::Spacer(2.0f);
+        UIWidgets::Spacer(0);
         UIWidgets::EnhancementSliderFloat("Hookshot Reach Multiplier: %.1fx", "##gCheatHookshotReachMultiplier", "gCheatHookshotReachMultiplier", 1.0f, 5.0f, "", 1.0f, false);
         UIWidgets::EnhancementSliderFloat("Bomb Timer Multiplier: %.1fx", "##gBombTimerMultiplier", "gBombTimerMultiplier", 0.1f, 5.0f, "", 1.0f, false);
         UIWidgets::PaddedEnhancementCheckbox("Moon Jump on L", "gMoonJumpOnL", true, false);
@@ -1271,8 +1358,6 @@ void DrawCheatsMenu() {
         UIWidgets::Tooltip("Passive Infinite Sword Glitch\nIt makes your sword's swing effect and hitbox stay active indefinitely");
         UIWidgets::PaddedEnhancementCheckbox("Easy QPA", "gEzQPA", true, false);
         UIWidgets::Tooltip("Gives you the glitched damage value of the quick put away glitch.");
-        UIWidgets::PaddedEnhancementCheckbox("Timeless Equipment", "gTimelessEquipment", true, false);
-        UIWidgets::Tooltip("Allows any item to be equipped, regardless of age\nAlso allows Child to use Adult strength upgrades");
         UIWidgets::PaddedEnhancementCheckbox("Easy Frame Advancing", "gCheatEasyPauseBufferEnabled", true, false);
         UIWidgets::Tooltip("Continue holding START button when unpausing to only advance a single frame and then re-pause");
         const bool bEasyFrameAdvanceEnabled = CVarGetInteger("gCheatEasyPauseBufferEnabled", 0);
@@ -1284,7 +1369,7 @@ void DrawCheatsMenu() {
         UIWidgets::Tooltip("Freezes the time of day");
         UIWidgets::PaddedEnhancementCheckbox("Drops Don't Despawn", "gDropsDontDie", true, false);
         UIWidgets::Tooltip("Drops from enemies, grass, etc. don't disappear after a set amount of time");
-        UIWidgets::PaddedEnhancementCheckbox("Fish Don't despawn", "gNoFishDespawn", true, false);
+        UIWidgets::PaddedEnhancementCheckbox("Fish Don't Despawn", "gNoFishDespawn", true, false);
         UIWidgets::Tooltip("Prevents fish from automatically despawning after a while when dropped");
         UIWidgets::PaddedEnhancementCheckbox("Bugs Don't despawn", "gNoBugsDespawn", true, false);
         UIWidgets::Tooltip("Prevents bugs from automatically despawning after a while when dropped");
@@ -1298,7 +1383,7 @@ void DrawCheatsMenu() {
         UIWidgets::EnhancementCombobox("gDekuStickCheat", DekuStickCheat, DEKU_STICK_NORMAL);
         UIWidgets::PaddedEnhancementCheckbox("No ReDead/Gibdo Freeze", "gNoRedeadFreeze", true, false);
         UIWidgets::Tooltip("Prevents ReDeads and Gibdos from being able to freeze you with their scream");
-        UIWidgets::Spacer(2.0f);
+        UIWidgets::Spacer(0);
         if (ImGui::BeginMenu("Save States")) {
             ImGui::TextColored({ 0.85f, 0.85f, 0.0f, 1.0f }, "          " ICON_FA_EXCLAMATION_TRIANGLE);
             ImGui::SameLine();
@@ -1321,7 +1406,7 @@ void DrawCheatsMenu() {
 
             ImGui::EndMenu();
         }
-        UIWidgets::Spacer(2.0f);
+        UIWidgets::Spacer(0);
 
         {
             static int32_t betaQuestEnabled = CVarGetInteger("gEnableBetaQuest", 0);
@@ -1386,16 +1471,16 @@ void DrawCheatsMenu() {
             }
         }
 
-        UIWidgets::Spacer(2.0f);
+        UIWidgets::Spacer(0);
         if (ImGui::Button("Change Age")) {
             CVarSetInteger("gSwitchAge", 1);
         }
-        UIWidgets::Tooltip("Switches Link's age and reloads the area.");  
+        UIWidgets::Tooltip("Switches Link's age and reloads the area.");
 
         if (ImGui::Button("Clear Cutscene Pointer")) {
             GameInteractor::RawAction::ClearCutscenePointer();
         }
-        UIWidgets::Tooltip("Clears the cutscene pointer to a value safe for wrong warps.");   
+        UIWidgets::Tooltip("Clears the cutscene pointer to a value safe for wrong warps.");
 
         ImGui::EndMenu();
     }
@@ -1569,12 +1654,12 @@ void DrawRandomizerMenu() {
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_BOSS_KEYSANITY) == RO_DUNGEON_ITEM_LOC_ANYWHERE ||
                 (OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_VANILLA &&
                     OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_OWN_DUNGEON &&
-                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_STARTWITH) || 
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_STARTWITH) ||
                 !IS_RANDO) {
                 disableKeyColors = false;
             }
 
-            static const char* disableKeyColorsText = 
+            static const char* disableKeyColorsText =
                 "This setting is disabled because a savefile is loaded without any key\n"
                 "shuffle settings set to \"Any Dungeon\", \"Overworld\" or \"Anywhere\"";
 
@@ -1630,4 +1715,4 @@ void SohMenuBar::DrawElement() {
         ImGui::EndMenuBar();
     }
 }
-} // namespace SohGui 
+} // namespace SohGui
