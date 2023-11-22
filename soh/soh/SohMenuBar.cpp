@@ -616,6 +616,8 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Allow Link to put items away without having to wait around");
                 UIWidgets::PaddedEnhancementCheckbox("Instant Boomerang Recall", "gFastBoomerang", true, false);
                 UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air");
+                UIWidgets::PaddedEnhancementCheckbox("Use Sword & Bombchus Underwater", "gEnhancedIronBoots", true, false);
+                UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedEnhancementCheckbox("Fix Anubis Fireballs", "gAnubisFix", true, false);
