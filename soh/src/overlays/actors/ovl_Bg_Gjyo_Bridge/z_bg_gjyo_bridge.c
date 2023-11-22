@@ -85,8 +85,11 @@ void BgGjyoBridge_TriggerCutscene(BgGjyoBridge* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
     if (!IS_RANDO) {
-        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_SPIRIT) && CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW) &&
-            (INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT) && CheckPlayerPosition(player, play)) {
+        // Check for all medallions before triggering the bridge cutscene
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) && CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)
+            && CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER) && CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW)
+            && CHECK_QUEST_ITEM(QUEST_MEDALLION_SPIRIT) && (INV_CONTENT(ITEM_ARROW_LIGHT) == ITEM_ARROW_LIGHT)
+            && CheckPlayerPosition(player, play)) {
             LaunchBridgeCutscene(this, play);
         }
     } else {
