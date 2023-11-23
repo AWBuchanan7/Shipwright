@@ -188,19 +188,17 @@ typedef enum {
     /* 1 */ FOOT_RIGHT
 } ActorFootIndex;
 
-/*
-BgCheckFlags WIP documentation:
-& 0x001 : Standing on the ground
-& 0x002 : Has touched the ground (only active for 1 frame)
-& 0x004 : Has left the ground (only active for 1 frame)
-& 0x008 : Touching a wall
-& 0x010 : Touching a ceiling
-& 0x020 : On or below water surface
-& 0x040 : Has touched water (actor is responsible for unsetting this the frame it touches the water)
-& 0x080 : Similar to & 0x1 but with no velocity check and is cleared every frame
-& 0x100 : Crushed between a floor and ceiling (triggers a void for player)
-& 0x200 : Unknown (only set/used by player so far)
-*/
+// BgCheckFlags (WIP)
+#define ACTOR_BGFLAG_ON_GROUND (1 << 0) // & 0x001: Standing on the ground
+#define ACTOR_BGFLAG_TOUCHED_GROUND (1 << 1) // & 0x002: Has touched the ground (only active for 1 frame)
+#define ACTOR_BGFLAG_LEFT_GROUND (1 << 2) // & 0x004: Has left the ground (only active for 1 frame)
+#define ACTOR_BGFLAG_TOUCHED_WALL (1 << 3) // & 0x008: Touching a wall
+#define ACTOR_BGFLAG_TOUCHED_CEILING (1 << 4) // & 0x010: Touching a ceiling
+#define ACTOR_BGFLAG_ON_WATER (1 << 5) // & 0x020: On or below water surface
+#define ACTOR_BGFLAG_TOUCHED_WATER (1 << 6) // & 0x040: Has touched water (actor is responsible for unsetting this the frame it touches the water)
+#define ACTOR_BGFLAG_GROUND_C (1 << 7) // & 0x080: Similar to & 0x1 but with no velocity check and is cleared every frame
+#define ACTOR_BGFLAG_CRUSHED (1 << 8) // & 0x100: Crushed between a floor and ceiling (triggers a void for player)
+#define ACTOR_BGFLAG_UNKNOWN (1 << 9) // & 0x200: Unknown (only set/used by player so far)
 
 /*
 colorFilterParams WIP documentation
