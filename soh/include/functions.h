@@ -1107,7 +1107,7 @@ u8 PlayerGrounded(Player* player);
 void Player_SetBootData(PlayState* play, Player* player);
 s32 Player_InBlockingCsMode(PlayState* play, Player* player);
 s32 Player_InCsMode(PlayState* play);
-s32 func_8008E9C4(Player* player);
+s32 Player_IsZTargetingEnemy(Player* player);
 s32 Player_IsChildWithHylianShield(Player* player);
 s32 Player_ActionToModelGroup(Player* player, s32 actionParam);
 void Player_SetModelsForHoldingShield(Player* player);

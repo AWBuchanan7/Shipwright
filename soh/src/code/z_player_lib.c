@@ -535,7 +535,7 @@ void Player_SetBootData(PlayState* play, Player* this) {
             currentBoots = PLAYER_BOOTS_KOKIRI_CHILD;
         }
     } else if (currentBoots == PLAYER_BOOTS_IRON) {
-        if (this->stateFlags1 & 0x8000000) {
+        if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
             currentBoots = PLAYER_BOOTS_IRON_UNDERWATER;
         }
         REG(27) = 500;
@@ -574,7 +574,7 @@ uint8_t Player_IsCustomLinkModel() {
 
 s32 Player_InBlockingCsMode(PlayState* play, Player* this) {
     return (this->stateFlags1 & 0x20000080) || (this->csMode != 0) || (play->transitionTrigger == TRANS_TRIGGER_START) ||
-           (this->stateFlags1 & 1) || (this->stateFlags3 & 0x80) ||
+           (this->stateFlags1 & PLAYER_STATE1_LOADING) || (this->stateFlags3 & 0x80) ||
            ((gSaveContext.magicState != MAGIC_STATE_IDLE) && (Player_ActionToMagicSpell(this, this->itemAction) >= 0));
 }
 
@@ -584,8 +584,8 @@ s32 Player_InCsMode(PlayState* play) {
     return Player_InBlockingCsMode(play, this) || (this->unk_6AD == 4);
 }
 
-s32 func_8008E9C4(Player* this) {
-    return (this->stateFlags1 & 0x10);
+s32 Player_IsZTargetingEnemy(Player* this) {
+    return (this->stateFlags1 & PLAYER_STATE1_ENEMY_TARGET);
 }
 
 s32 Player_IsChildWithHylianShield(Player* this) {
@@ -604,7 +604,7 @@ s32 Player_ActionToModelGroup(Player* this, s32 actionParam) {
 }
 
 void Player_SetModelsForHoldingShield(Player* this) {
-    if ((this->stateFlags1 & 0x400000) &&
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) &&
         ((this->itemAction < 0) || (this->itemAction == this->heldItemAction))) {
         if ((CVarGetInteger("gShieldTwoHanded", 0) && (this->heldItemAction != PLAYER_IA_DEKU_STICK) ||
             !Player_HoldsTwoHandedWeapon(this)) && !Player_IsChildWithHylianShield(this)) {
@@ -695,11 +695,11 @@ void func_8008EDF0(Player* this) {
 }
 
 void func_8008EE08(Player* this) {
-    if ((this->actor.bgCheckFlags & 1) || (this->stateFlags1 & 0x8A00000) ||
+    if ((this->actor.bgCheckFlags & ACTOR_BGFLAG_ON_GROUND) || (this->stateFlags1 & 0x8A00000) ||
         (!(this->stateFlags1 & 0xC0000) && ((this->actor.world.pos.y - this->actor.floorHeight) < 100.0f))) {
         this->stateFlags1 &= ~0x400F8000;
     } else if (!(this->stateFlags1 & 0x2C0000)) {
-        this->stateFlags1 |= 0x80000;
+        this->stateFlags1 |= PLAYER_STATE1_FREEFALL;
     }
 
     func_8008EDF0(this);
@@ -711,7 +711,7 @@ void func_8008EEAC(PlayState* play, Actor* actor) {
     func_8008EE08(this);
     this->unk_664 = actor;
     this->unk_684 = actor;
-    this->stateFlags1 |= 0x10000;
+    this->stateFlags1 |= PLAYER_STATE1_TARGET_LOCKED;
     Camera_SetParam(Play_GetCamera(play, 0), 8, actor);
     Camera_ChangeMode(Play_GetCamera(play, 0), 2);
 }
@@ -719,7 +719,7 @@ void func_8008EEAC(PlayState* play, Actor* actor) {
 s32 func_8008EF30(PlayState* play) {
     Player* this = GET_PLAYER(play);
 
-    return (this->stateFlags1 & 0x800000);
+    return (this->stateFlags1 & PLAYER_STATE1_IN_WATER);
 }
 
 s32 func_8008EF44(PlayState* play, s32 ammo) {
@@ -891,8 +891,8 @@ s32 Player_GetEnvironmentalHazard(PlayState* play) {
         var = 0;
     } else if ((this->unk_840 > 80) &&
                ((this->currentBoots == PLAYER_BOOTS_IRON) || (this->unk_840 >= 300))) { // Deep underwater
-        var = ((this->currentBoots == PLAYER_BOOTS_IRON) && (this->actor.bgCheckFlags & 1)) ? 1 : 3;
-    } else if (this->stateFlags1 & 0x8000000) { // Swimming
+        var = ((this->currentBoots == PLAYER_BOOTS_IRON) && (this->actor.bgCheckFlags & ACTOR_BGFLAG_ON_GROUND)) ? 1 : 3;
+    } else if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) { // Swimming
         var = 2;
     } else {
         return 0;
@@ -903,9 +903,10 @@ s32 Player_GetEnvironmentalHazard(PlayState* play) {
         triggerEntry = &sTextTriggers[var];
 
         if ((triggerEntry->flag != 0) && !(gSaveContext.textTriggerFlags & triggerEntry->flag) &&
-            (((var == 0) && (this->currentTunic != PLAYER_TUNIC_GORON && CVarGetInteger("gSuperTunic", 0) == 0 && CVarGetInteger("gDisableTunicWarningText", 0) == 0)) ||
-             (((var == 1) || (var == 3)) && (this->currentBoots == PLAYER_BOOTS_IRON) &&
-              (this->currentTunic != PLAYER_TUNIC_ZORA && CVarGetInteger("gSuperTunic", 0) == 0 && CVarGetInteger("gDisableTunicWarningText", 0) == 0)))) {
+            (CVarGetInteger("gSuperTunic", 0) == 0) && (CVarGetInteger("gDisableTunicWarningText", 0) == 0) &&
+              (((var == 0) && (this->currentTunic != PLAYER_TUNIC_GORON)) ||
+               (((var == 1) || (var == 3)) && (this->currentBoots == PLAYER_BOOTS_IRON) &&
+                 (this->currentTunic != PLAYER_TUNIC_ZORA )))) {
             Message_StartTextbox(play, triggerEntry->textId, NULL);
             gSaveContext.textTriggerFlags |= triggerEntry->flag;
         }
@@ -1284,7 +1285,7 @@ s32 Player_OverrideLimbDrawGameplayDefault(PlayState* play, s32 limbIndex, Gfx**
             } else if ((sLeftHandType == PLAYER_MODELTYPE_LH_BOOMERANG) && (this->stateFlags1 & 0x2000000)) {
                 dLists = &gPlayerLeftHandOpenDLs[gSaveContext.linkAge];
                 sLeftHandType = 0;
-            } else if ((this->leftHandType == PLAYER_MODELTYPE_LH_OPEN) && (this->actor.speedXZ > 2.0f) && !(this->stateFlags1 & 0x8000000)) {
+            } else if ((this->leftHandType == PLAYER_MODELTYPE_LH_OPEN) && (this->actor.speedXZ > 2.0f) && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
                 dLists = &gPlayerLeftHandClosedDLs[gSaveContext.linkAge];
                 sLeftHandType = PLAYER_MODELTYPE_LH_CLOSED;
             }
@@ -1295,7 +1296,7 @@ s32 Player_OverrideLimbDrawGameplayDefault(PlayState* play, s32 limbIndex, Gfx**
 
             if (sRightHandType == PLAYER_MODELTYPE_RH_SHIELD) {
                 dLists += this->currentShield * 4;
-            } else if ((this->rightHandType == PLAYER_MODELTYPE_RH_OPEN) && (this->actor.speedXZ > 2.0f) && !(this->stateFlags1 & 0x8000000)) {
+            } else if ((this->rightHandType == PLAYER_MODELTYPE_RH_OPEN) && (this->actor.speedXZ > 2.0f) && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
                 dLists = &sPlayerRightHandClosedDLs[gSaveContext.linkAge];
                 sRightHandType = PLAYER_MODELTYPE_RH_CLOSED;
             }
