@@ -584,7 +584,7 @@ s32 Player_InCsMode(PlayState* play) {
     return Player_InBlockingCsMode(play, this) || (this->unk_6AD == 4);
 }
 
-s32 Player_IsZTargetingEnemy(Player* this) {
+s32 Player_InZTargetingCombat(Player* this) {
     return (this->stateFlags1 & PLAYER_STATE1_ENEMY_TARGET);
 }
 

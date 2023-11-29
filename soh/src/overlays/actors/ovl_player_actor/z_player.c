@@ -2127,7 +2127,7 @@ void Player_InitItemAction(PlayState* play, Player* this, s8 itemAction) {
     Player_SetModelGroup(this, this->modelGroup);
 }
 
-void func_80833A20(Player* this, s32 newMeleeWeaponState) {
+void Player_UpdateMeleeWeaponState(Player* this, s32 newMeleeWeaponState) {
     u16 itemSfx;
     u16 voiceSfx;
 
@@ -2166,7 +2166,7 @@ void func_80833A20(Player* this, s32 newMeleeWeaponState) {
     this->meleeWeaponState = newMeleeWeaponState;
 }
 
-s32 Player_IsZTargetingNonEnemy(Player* this) {
+s32 Player_TargetNonEnemy(Player* this) {
     if (this->stateFlags1 & (PLAYER_STATE1_TARGET_LOCKED | PLAYER_STATE1_TARGET_NOTHING | PLAYER_STATE1_30)) {
         return 1;
     } else {
@@ -2190,12 +2190,12 @@ s32 Player_TargetEnemy(Player* this) {
     return 0;
 }
 
-s32 Player_IsZTargeting(Player* this) {
-    return Player_IsZTargetingEnemy(this) || Player_IsZTargetingNonEnemy(this);
+s32 Player_InZTargeting(Player* this) {
+    return Player_InZTargetingCombat(this) || Player_TargetNonEnemy(this);
 }
 
 s32 Player_CanSwitchZTargetToEnemyFromNonEnemy(Player* this) {
-    return Player_TargetEnemy(this) || Player_IsZTargetingNonEnemy(this);
+    return Player_TargetEnemy(this) || Player_TargetNonEnemy(this);
 }
 
 void func_80833C3C(Player* this) {
@@ -2219,10 +2219,9 @@ s32 Player_ItemIsItemAction(s32 item1, s32 itemAction) {
 }
 
 s32 Player_GetItemOnButton(PlayState* play, s32 index) {
-    // if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 4)) {
-    //     return ITEM_NONE;
-    // } else
-    if (play->bombchuBowlingStatus != 0) {
+    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 4)) {
+         return ITEM_NONE;
+    } else if (play->bombchuBowlingStatus != 0) {
         return (play->bombchuBowlingStatus > 0) ? ITEM_BOMBCHU : ITEM_NONE;
     } else if (index == 0) {
         return B_BTN_ITEM;
@@ -2240,9 +2239,9 @@ s32 Player_GetItemOnButton(PlayState* play, s32 index) {
         return DPAD_ITEM(2);
     } else if (index == 7) {
         return DPAD_ITEM(3);
+    } else {
+        return ITEM_NONE;    
     }
-    
-    return ITEM_NONE;
 }
 
 /**
@@ -2513,8 +2512,8 @@ s32 func_80834758(PlayState* play, Player* this) {
 
     if (!(this->stateFlags1 & (PLAYER_STATE1_SHIELDING | PLAYER_STATE1_ON_HORSE | PLAYER_STATE1_IN_CUTSCENE)) &&
         (play->shootingGalleryStatus == 0) && (this->heldItemAction == this->itemAction) &&
-        (this->currentShield != PLAYER_SHIELD_NONE) && !Player_IsChildWithHylianShield(this) && Player_IsZTargeting(this) &&
-        CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) {
+        (this->currentShield != PLAYER_SHIELD_NONE) && !Player_IsChildWithHylianShield(this) &&
+          Player_InZTargeting(this) && CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) {
 
         anim = func_808346C4(play, this);
         frame = Animation_GetLastFrame(anim);
@@ -2688,7 +2687,7 @@ s32 func_80834E7C(PlayState* play) {
 
 s32 func_80834EB8(Player* this, PlayState* play) {
     if ((this->unk_6AD == 0) || (this->unk_6AD == 2)) {
-        if (Player_IsZTargeting(this) || (Camera_CheckValidMode(Play_GetCamera(play, 0), 7) == 0)) {
+        if (Player_InZTargeting(this) || (Camera_CheckValidMode(Play_GetCamera(play, 0), 7) == 0)) {
             return 1;
         }
         this->unk_6AD = 2;
@@ -2853,7 +2852,7 @@ s32 func_808353D8(Player* this, PlayState* play) {
             this->unk_834--;
         }
 
-        if (Player_IsZTargeting(this) || (this->unk_6AD != 0) || (this->stateFlags1 & PLAYER_STATE1_FIRST_PERSON)) {
+        if (Player_InZTargeting(this) || (this->unk_6AD != 0) || (this->stateFlags1 & PLAYER_STATE1_FIRST_PERSON)) {
             if (this->unk_834 == 0) {
                 this->unk_834++;
             }
@@ -3004,7 +3003,7 @@ s32 func_808359FC(Player* this, PlayState* play) {
             boomerang->moveTo = this->unk_664;
             boomerang->returnTimer = 20;
             this->stateFlags1 |= PLAYER_STATE1_THREW_BOOMERANG;
-            if (!Player_IsZTargetingEnemy(this)) {
+            if (!Player_InZTargetingCombat(this)) {
                 func_808355DC(this);
             }
             this->unk_A73 = 4;
@@ -3238,7 +3237,7 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
 
             if (((itemAction >= PLAYER_IA_OCARINA_FAIRY) && (itemAction <= PLAYER_IA_OCARINA_OF_TIME)) ||
                 (itemAction >= PLAYER_IA_BOTTLE_FISH)) {
-                if (!Player_IsZTargetingEnemy(this) ||
+                if (!Player_InZTargetingCombat(this) ||
                     ((itemAction >= PLAYER_IA_BOTTLE_POTION_RED) && (itemAction <= PLAYER_IA_BOTTLE_FAIRY))) {
                     func_8002D53C(play, &play->actorCtx.titleCtx);
                     this->unk_6AD = 4;
@@ -3621,7 +3620,7 @@ s32 Player_GetMovementSpeedAndYaw(Player* this, f32* outSpeedTarget, s16* outYaw
                 *outYawTarget = Math_Vec3f_Yaw(&this->actor.world.pos, &this->unk_664->focus.pos);
                 return false;
             }
-        } else if (Player_IsZTargetingNonEnemy(this)) {
+        } else if (Player_TargetNonEnemy(this)) {
             *outYawTarget = this->targetYaw;
         }
 
@@ -3816,7 +3815,7 @@ s32 func_80837818(Player* this) {
             sp18 = PLAYER_MWA_SPIN_ATTACK_1H;
         } else {
             if (sp1C < 0) {
-                if (Player_IsZTargeting(this)) {
+                if (Player_InZTargeting(this)) {
                     sp18 = PLAYER_MWA_FORWARD_SLASH_1H;
                 } else {
                     sp18 = PLAYER_MWA_RIGHT_SLASH_1H;
@@ -3825,7 +3824,7 @@ s32 func_80837818(Player* this) {
                 sp18 = D_80854480[sp1C];
                 if (sp18 == PLAYER_MWA_STAB_1H) {
                     this->stateFlags2 |= PLAYER_STATE2_SWORD_LUNGE;
-                    if (!Player_IsZTargeting(this)) {
+                    if (!Player_InZTargeting(this)) {
                         sp18 = PLAYER_MWA_FORWARD_SLASH_1H;
                     }
                 }
@@ -4050,7 +4049,7 @@ void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, 
             this->hoverBootsTimer = 0;
             this->actor.bgCheckFlags &= ~1;
         } else {
-            if ((this->linearVelocity > 4.0f) && !Player_IsZTargetingEnemy(this)) {
+            if ((this->linearVelocity > 4.0f) && !Player_InZTargetingCombat(this)) {
                 this->unk_890 = 20;
                 Player_RequestRumble(this, 120, 20, 10, 0);
                 func_80832698(this, NA_SE_VO_LI_DAMAGE_S);
@@ -4074,7 +4073,7 @@ void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, 
                 sp28 += 2;
             }
 
-            if (Player_IsZTargetingEnemy(this)) {
+            if (Player_InZTargetingCombat(this)) {
                 sp28 += 1;
             }
 
@@ -4907,9 +4906,9 @@ void func_80839F30(Player* this, PlayState* play) {
 }
 
 void func_80839F90(Player* this, PlayState* play) {
-    if (Player_IsZTargetingEnemy(this)) {
+    if (Player_InZTargetingCombat(this)) {
         func_80839E88(this, play);
-    } else if (Player_IsZTargetingNonEnemy(this)) {
+    } else if (Player_TargetNonEnemy(this)) {
         func_80839F30(this, play);
     } else {
         func_80853080(this, play);
@@ -4919,9 +4918,9 @@ void func_80839F90(Player* this, PlayState* play) {
 void func_80839FFC(Player* this, PlayState* play) {
     PlayerActionFunc actionFunc;
 
-    if (Player_IsZTargetingEnemy(this)) {
+    if (Player_InZTargetingCombat(this)) {
         actionFunc = func_80840450;
-    } else if (Player_IsZTargetingNonEnemy(this)) {
+    } else if (Player_TargetNonEnemy(this)) {
         actionFunc = func_808407CC;
     } else {
         actionFunc = func_80840BC8;
@@ -4932,7 +4931,7 @@ void func_80839FFC(Player* this, PlayState* play) {
 
 void func_8083A060(Player* this, PlayState* play) {
     func_80839FFC(this, play);
-    if (Player_IsZTargetingEnemy(this)) {
+    if (Player_InZTargetingCombat(this)) {
         this->unk_850 = 1;
     }
 }
@@ -5592,7 +5591,7 @@ s32 func_8083B998(Player* this, PlayState* play) {
     if ((this->unk_664 != NULL) &&
         (CHECK_FLAG_ALL(this->unk_664->flags, ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_NAVI_HAS_INFO) || (this->unk_664->naviEnemyId != 0xFF))) {
         this->stateFlags2 |= PLAYER_STATE2_NAVI_ALERT;
-    } else if ((this->naviTextId == 0 || CVarGetInteger("gNaviOnL", 0)) && !Player_IsZTargetingEnemy(this) &&
+    } else if ((this->naviTextId == 0 || CVarGetInteger("gNaviOnL", 0)) && !Player_InZTargetingCombat(this) &&
                CHECK_BTN_ALL(sControlInput->press.button, BTN_CUP) && (YREG(15) != 0x10) && (YREG(15) != 0x20) &&
                !func_8083B8F4(this, play)) {
         func_80078884(NA_SE_SY_ERROR);
@@ -5679,7 +5678,7 @@ s32 func_8083BDBC(Player* this, PlayState* play) {
         sp2C = this->unk_84B[this->unk_846];
 
         if (sp2C <= 0) {
-            if (Player_IsZTargeting(this)) {
+            if (Player_InZTargeting(this)) {
                 if (this->actor.category != ACTORCAT_PLAYER) {
                     if (sp2C < 0) {
                         func_808389E8(this, &gPlayerAnim_link_normal_jump, REG(69) / 100.0f, play);
@@ -5790,7 +5789,7 @@ s32 func_8083C2B0(Player* this, PlayState* play) {
 
     if ((play->shootingGalleryStatus == 0) && (this->currentShield != PLAYER_SHIELD_NONE) &&
         CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) &&
-        (Player_IsChildWithHylianShield(this) || (!Player_IsZTargetingNonEnemy(this) && (this->unk_664 == NULL)))) {
+        (Player_IsChildWithHylianShield(this) || (!Player_TargetNonEnemy(this) && (this->unk_664 == NULL)))) {
 
         func_80832318(this);
         Player_DetachHeldActor(play, this);
@@ -5806,7 +5805,7 @@ s32 func_8083C2B0(Player* this, PlayState* play) {
             }
 
             if (anim != this->skelAnime.animation) {
-                if (Player_IsZTargetingEnemy(this)) {
+                if (Player_InZTargetingCombat(this)) {
                     this->unk_86C = 1.0f;
                 } else {
                     this->unk_86C = 0.0f;
@@ -5931,7 +5930,7 @@ s32 func_8083C6B8(PlayState* play, Player* this) {
 void func_8083C858(Player* this, PlayState* play) {
     PlayerActionFunc actionFunc;
 
-    if (Player_IsZTargeting(this)) {
+    if (Player_InZTargeting(this)) {
         actionFunc = func_8084227C;
     } else {
         actionFunc = func_80842180;
@@ -7422,7 +7421,7 @@ void func_80840450(Player* this, PlayState* play) {
     func_8083721C(this);
 
     if (!Player_TryActionChangeList(play, this, D_808543E0, 1)) {
-        if (!Player_TargetEnemy(this) && (!Player_IsZTargetingNonEnemy(this) || (func_80834B5C != this->upperActionFunc))) {
+        if (!Player_TargetEnemy(this) && (!Player_TargetNonEnemy(this) || (func_80834B5C != this->upperActionFunc))) {
             func_8083CF10(this, play);
             return;
         }
@@ -7493,7 +7492,7 @@ void func_808407CC(Player* this, PlayState* play) {
             return;
         }
 
-        if (!Player_IsZTargetingNonEnemy(this)) {
+        if (!Player_TargetNonEnemy(this)) {
             func_80835DAC(play, this, func_80840BC8, 1);
             this->currentYaw = this->actor.shape.rot.y;
             return;
@@ -7620,7 +7619,7 @@ void func_80840BC8(Player* this, PlayState* play) {
                 return;
             }
 
-            if (Player_IsZTargetingNonEnemy(this)) {
+            if (Player_TargetNonEnemy(this)) {
                 func_80839F30(this, play);
                 return;
             }
@@ -7693,7 +7692,7 @@ void func_80840DE4(Player* this, PlayState* play) {
             return;
         }
 
-        if (!Player_IsZTargetingNonEnemy(this)) {
+        if (!Player_TargetNonEnemy(this)) {
             func_80853080(this, play);
             return;
         }
@@ -7912,7 +7911,7 @@ void func_8084193C(Player* this, PlayState* play) {
 
         Player_GetMovementSpeedAndYaw(this, &sp3C, &sp3A, 0.0f, play);
 
-        if (Player_IsZTargetingNonEnemy(this)) {
+        if (Player_TargetNonEnemy(this)) {
             temp1 = func_8083FD78(this, &sp3C, &sp3A, play);
         } else {
             temp1 = func_8083FC68(this, sp3C, sp3A);
@@ -7924,7 +7923,7 @@ void func_8084193C(Player* this, PlayState* play) {
         }
 
         if (temp1 < 0) {
-            if (Player_IsZTargetingNonEnemy(this)) {
+            if (Player_TargetNonEnemy(this)) {
                 func_8083CB2C(this, sp3A, play);
             } else {
                 func_8083CBF0(this, sp3A, play);
@@ -7933,7 +7932,7 @@ void func_8084193C(Player* this, PlayState* play) {
         }
 
         if ((this->linearVelocity < 3.6f) && (sp3C < 4.0f)) {
-            if (!Player_IsZTargetingEnemy(this) && Player_IsZTargetingNonEnemy(this)) {
+            if (!Player_InZTargetingCombat(this) && Player_TargetNonEnemy(this)) {
                 func_8083CB94(this, play);
             } else {
                 func_80839F90(this, play);
@@ -8155,8 +8154,8 @@ void func_8084227C(Player* this, PlayState* play) {
         Player_GetMovementSpeedAndYaw(this, &sp2C, &sp2A, 0.0f, play);
 
         if (!func_8083C484(this, &sp2C, &sp2A)) {
-            if ((Player_IsZTargetingNonEnemy(this) && (sp2C != 0.0f) && (func_8083FD78(this, &sp2C, &sp2A, play) <= 0)) ||
-                (!Player_IsZTargetingNonEnemy(this) && (func_8083FC68(this, sp2C, sp2A) <= 0))) {
+            if ((Player_TargetNonEnemy(this) && (sp2C != 0.0f) && (func_8083FD78(this, &sp2C, &sp2A, play) <= 0)) ||
+                (!Player_TargetNonEnemy(this) && (func_8083FC68(this, sp2C, sp2A) <= 0))) {
                 func_80839F90(this, play);
                 return;
             }
@@ -8268,7 +8267,7 @@ void func_8084279C(Player* this, PlayState* play) {
 
 s32 func_8084285C(Player* this, f32 arg1, f32 arg2, f32 arg3) {
     if ((arg1 <= this->skelAnime.curFrame) && (this->skelAnime.curFrame <= arg3)) {
-        Player_UpdateMeleeAttackState(this, (arg2 <= this->skelAnime.curFrame) ? 1 : -1);
+        Player_UpdateMeleeWeaponState(this, (arg2 <= this->skelAnime.curFrame) ? 1 : -1);
         return 1;
     }
 
@@ -8387,7 +8386,7 @@ void func_80842D20(PlayState* play, Player* this) {
         func_80832440(play, this);
         Player_SetupAction(play, this, func_808505DC, 0);
 
-        if (Player_IsZTargetingEnemy(this)) {
+        if (Player_InZTargetingCombat(this)) {
             sp28 = 2;
         } else {
             sp28 = 0;
@@ -8548,7 +8547,7 @@ void func_80843188(Player* this, PlayState* play) {
         if (this->unk_84F != 0) {
             if (!func_80842DF4(play, this)) {
                 if (this->skelAnime.curFrame < 2.0f) {
-                    Player_UpdateMeleeAttackState(this, 1);
+                    Player_UpdateMeleeWeaponState(this, 1);
                 }
             } else {
                 this->unk_850 = 1;
@@ -8889,7 +8888,7 @@ void func_8084411C(Player* this, PlayState* play) {
 
     if (gSaveContext.respawn[RESPAWN_MODE_TOP].data > 40) {
         this->actor.gravity = 0.0f;
-    } else if (Player_IsZTargetingEnemy(this)) {
+    } else if (Player_InZTargetingCombat(this)) {
         this->actor.gravity = -1.2f;
     }
 
@@ -8965,14 +8964,14 @@ void func_8084411C(Player* this, PlayState* play) {
         s32 sp3C;
 
         if (this->stateFlags2 & PLAYER_STATE2_HOPPING) {
-            if (Player_IsZTargetingEnemy(this)) {
+            if (Player_InZTargetingCombat(this)) {
                 anim = D_80853D4C[this->unk_84F][2];
             } else {
                 anim = D_80853D4C[this->unk_84F][1];
             }
         } else if (this->skelAnime.animation == &gPlayerAnim_link_normal_run_jump) {
             anim = &gPlayerAnim_link_normal_run_jump_end;
-        } else if (Player_IsZTargetingEnemy(this)) {
+        } else if (Player_InZTargetingCombat(this)) {
             anim = &gPlayerAnim_link_anchor_landingR;
             func_80833C3C(this);
         } else if (this->fallDistance <= 80) {
@@ -10247,16 +10246,16 @@ void func_808473D4(PlayState* play, Player* this) {
                     doAction = sDiveDoActions[sp24];
                 } else if (sp1C && !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
                     doAction = DO_ACTION_DIVE;
-                } else if (!sp1C && (!(this->stateFlags1 & PLAYER_STATE1_SHIELDING) || Player_IsZTargeting(this) ||
+                } else if (!sp1C && (!(this->stateFlags1 & PLAYER_STATE1_SHIELDING) || Player_InZTargeting(this) ||
                                      !Player_IsChildWithHylianShield(this))) {
                     if ((!(this->stateFlags1 & PLAYER_STATE1_CLIMBING_LEDGE) && (sp20 <= 0) &&
-                         (Player_IsZTargetingEnemy(this) ||
-                          ((sFloorType != 7) && (Player_IsZTargetingNonEnemy(this) ||
+                         (Player_InZTargetingCombat(this) ||
+                          ((sFloorType != 7) && (Player_TargetNonEnemy(this) ||
                                                  ((play->roomCtx.curRoom.behaviorType1 != ROOM_BEHAVIOR_TYPE1_2) &&
                                                   !(this->stateFlags1 & PLAYER_STATE1_SHIELDING) && (sp20 == 0))))))) {
                         doAction = DO_ACTION_ATTACK;
                     } else if ((play->roomCtx.curRoom.behaviorType1 != ROOM_BEHAVIOR_TYPE1_2) &&
-                               Player_IsZTargeting(this) && (sp20 > 0)) {
+                               Player_InZTargeting(this) && (sp20 > 0)) {
                         doAction = DO_ACTION_JUMP;
                     } else if ((this->heldItemAction >= PLAYER_IA_SWORD_MASTER) ||
                                ((this->stateFlags2 & PLAYER_STATE2_NAVI_OUT) &&
@@ -10698,7 +10697,7 @@ void Player_UpdateCamAndSeqModes(PlayState* play, Player* this) {
                 camMode = CAM_MODE_FOLLOWBOOMERANG;
                 Camera_SetParam(Play_GetCamera(play, 0), 8, this->boomerangActor);
             } else if (this->stateFlags1 & (PLAYER_STATE1_HANGING_OFF_LEDGE | PLAYER_STATE1_CLIMBING_LEDGE)) {
-                if (Player_IsZTargetingNonEnemy(this)) {
+                if (Player_TargetNonEnemy(this)) {
                     camMode = CAM_MODE_HANGZ;
                 } else {
                     camMode = CAM_MODE_HANG;
@@ -11709,7 +11708,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
         s32 lod;
         s32 pad;
 
-        if ((this->csAction != 0) || (Player_IsZTargetingEnemy(this) && 0) || (this->actor.projectedPos.z < 160.0f)) {
+        if ((this->csAction != 0) || (Player_InZTargetingCombat(this) && 0) || (this->actor.projectedPos.z < 160.0f)) {
             lod = 0;
         } else {
             lod = 1;
@@ -11980,7 +11979,7 @@ void func_8084B1D8(Player* this, PlayState* play) {
     if ((this->csAction != 0) || (this->unk_6AD == 0) || (this->unk_6AD >= 4) || Player_TargetEnemy(this) ||
         (this->unk_664 != NULL) || !func_8083AD4C(play, this) ||
         (((this->unk_6AD == 2) && (CHECK_BTN_ANY(sControlInput->press.button, BTN_A | BTN_B | BTN_R) ||
-                                   Player_IsZTargetingNonEnemy(this) || (!func_8002DD78(this) && !func_808334B4(this)))) ||
+                                   Player_TargetNonEnemy(this) || (!func_8002DD78(this) && !func_808334B4(this)))) ||
          ((this->unk_6AD == 1) && CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)))) {
         func_8083C148(this, play);
         func_80078884(NA_SE_SY_CAMERA_ZOOM_UP);
@@ -12071,7 +12070,7 @@ void func_8084B530(Player* this, PlayState* play) {
         func_8084CC98(this, play);
     } else if (func_808332B8(this)) {
         func_8084D610(this, play);
-    } else if (!Player_IsZTargetingEnemy(this) && LinkAnimation_Update(play, &this->skelAnime)) {
+    } else if (!Player_InZTargetingCombat(this) && LinkAnimation_Update(play, &this->skelAnime)) {
         if (this->skelAnime.moveFlags != 0) {
             func_80832DBC(this);
             if ((this->targetActor->category == ACTORCAT_NPC) &&
@@ -12811,7 +12810,7 @@ void func_8084CC98(Player* this, PlayState* play) {
 
         if (this->stateFlags1 & PLAYER_STATE1_FIRST_PERSON) {
             if (!func_8083AD4C(play, this) || CHECK_BTN_ANY(sControlInput->press.button, BTN_A) ||
-                Player_IsZTargeting(this)) {
+                Player_InZTargeting(this)) {
                 this->unk_6AD = 0;
                 this->stateFlags1 &= ~PLAYER_STATE1_FIRST_PERSON;
             } else {
@@ -14235,7 +14234,7 @@ void func_808502D0(Player* this, PlayState* play) {
                 u8 sp43 = this->skelAnime.moveFlags;
                 LinkAnimationHeader* sp3C;
 
-                if (Player_IsZTargetingEnemy(this)) {
+                if (Player_InZTargetingCombat(this)) {
                     sp3C = sp44->unk_08;
                 } else {
                     sp3C = sp44->unk_04;
@@ -15125,7 +15124,8 @@ void func_80851BE8(PlayState* play, Player* this, CsCmdActorAction* arg2) {
 }
 
 void func_80851CA4(PlayState* play, Player* this, CsCmdActorAction* arg2) {
-    if (LinkAnimation_Update(play, &this->skelAnime) && (this->unk_850 == 0) && (this->actor.bgCheckFlags & ACTOR_BGFLAG_ON_GROUND)) {
+    if (LinkAnimation_Update(play, &this->skelAnime) &&
+      (this->unk_850 == 0) && (this->actor.bgCheckFlags & ACTOR_BGFLAG_ON_GROUND)) {
         Player_AnimPlayOnce(play, this, &gPlayerAnim_link_normal_back_downB);
         this->unk_850 = 1;
     }
@@ -15702,7 +15702,7 @@ void func_80853148(PlayState* play, Actor* actor) {
             } else if ((actor->category != ACTORCAT_NPC) || (this->heldItemAction == PLAYER_IA_FISHING_POLE)) {
                 func_8083A2F8(play, this);
 
-                if (!Player_IsZTargetingEnemy(this)) {
+                if (!Player_InZTargetingCombat(this)) {
                     if ((actor != this->naviActor) && (actor->xzDistToPlayer < 40.0f)) {
                         Player_AnimPlayOnceAdjusted(play, this, &gPlayerAnim_link_normal_backspace);
                     } else {
