@@ -492,6 +492,7 @@ extern std::shared_ptr<GameplayStatsWindow> mGameplayStatsWindow;
 void DrawEnhancementsMenu() {
     if (ImGui::BeginMenu("Enhancements"))
     {
+        ImGui::BeginDisabled(CVarGetInteger("gDisableChangingSettings", 0));
         DrawPresetSelector(PRESET_TYPE_ENHANCEMENTS);
 
         UIWidgets::PaddedSeparator();
@@ -502,6 +503,9 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Fixes the bushes to drop items correctly rather than spawning undefined items.");
             UIWidgets::PaddedEnhancementCheckbox("Fix Credits Timing", "gCreditsFix", true, false);
             UIWidgets::Tooltip("Extend certain credits scenes so the music lines up properly with the visuals");
+            UIWidgets::PaddedEnhancementCheckbox("Fix Darunia's Dance Speed", "gEnhancements.FixDaruniaDanceSpeed",
+                                        true, false, false, "", UIWidgets::CheckboxGraphics::Cross, true);
+            UIWidgets::Tooltip("Fixes Darunia's dancing speed so he dances to the beat of Saria's Song, like in vanilla.");
             UIWidgets::PaddedEnhancementCheckbox("Fix Deku Nut Upgrade", "gDekuNutUpgradeFix", true, false);
             UIWidgets::Tooltip("Prevents the Forest Stage Deku Nut upgrade from becoming unobtainable after receiving the Poacher's Saw");
             UIWidgets::PaddedEnhancementCheckbox("Fix Gravedigging Tour Glitch", "gGravediggingTourFix", true, false);
@@ -618,6 +622,7 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air");
                 UIWidgets::PaddedEnhancementCheckbox("Use Sword & Bombchus Underwater", "gEnhancedIronBoots", true, false);
                 UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
+                
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedEnhancementCheckbox("Fix Anubis Fireballs", "gAnubisFix", true, false);
@@ -658,6 +663,8 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Kick open every chest");
                 UIWidgets::PaddedEnhancementCheckbox("Faster Ocarina Playback", "gFastOcarinaPlayback", true, false);
                 UIWidgets::PaddedSeparator();
+                UIWidgets::PaddedEnhancementCheckbox("Skip Take Breath Animation After Diving", "gSkipSwimDeepEndAnim", true, false);
+                UIWidgets::Tooltip("Skips Link's taking breath animation after coming up from water.\n\nThis setting does not interfere with getting items from underwater.");
 
                 bool forceSkipScarecrow = IS_RANDO &&
                     OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SKIP_SCARECROWS_SONG);
@@ -696,7 +703,11 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedEnhancementCheckbox("Mute Navi Call", "gDisableNaviCallAudio", true, false);
                 UIWidgets::Tooltip("Disables the voice audio when Navi calls you");
                 UIWidgets::PaddedSeparator();
-
+                
+                UIWidgets::PaddedEnhancementCheckbox("Ask to Equip New Items", "gAskToEquip", true, false);
+                UIWidgets::Tooltip("Adds a prompt to equip newly-obtained swords, shields and tunics.");
+                UIWidgets::PaddedEnhancementCheckbox("Display Item Counts in Messages", "gInjectItemCounts", true, false);
+                UIWidgets::Tooltip("Injects item counts in pickup messages, like golden skulltula tokens and heart pieces.");
                 UIWidgets::PaddedEnhancementCheckbox("Disable Forced Navi Conversations", "gNoForcedNavi", true, false);
                 UIWidgets::Tooltip("Prevent forced Navi conversations");
                 UIWidgets::PaddedEnhancementCheckbox("Disable Gold Skulltula Freeze", "gSkulltulaFreeze", true, false);
@@ -731,10 +742,6 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedEnhancementCheckbox("Display Guards Vision", "gGuardVision", true, false);
                 UIWidgets::PaddedSeparator();
 
-                UIWidgets::PaddedEnhancementCheckbox("Ask to Equip New Items", "gAskToEquip", true, false);
-                UIWidgets::Tooltip("Adds a prompt to equip newly-obtained swords, shields and tunics.");
-                UIWidgets::PaddedEnhancementCheckbox("Display Item Counts in Messages", "gInjectItemCounts", true, false);
-                UIWidgets::Tooltip("Injects item counts in pickup messages, like golden skulltula tokens and heart pieces.");
                 UIWidgets::PaddedEnhancementCheckbox("Don't Require Input for Credits Sequence", "gNoInputForCredits", true, false);
                 UIWidgets::Tooltip("Removes the input requirement on textboxes after defeating Ganon, allowing Credits sequence to continue to progress.");
                 UIWidgets::PaddedEnhancementCheckbox("Prevent Dropped Ocarina Inputs", "gDpadNoDropOcarinaInput", true, false);
@@ -906,8 +913,7 @@ void DrawEnhancementsMenu() {
             UIWidgets::PaddedEnhancementCheckbox("Dogs Follow You Everywhere", "gDogFollowsEverywhere", true, false);
             UIWidgets::Tooltip("Allows dogs to follow you anywhere you go, even if you leave the market");
             UIWidgets::PaddedEnhancementCheckbox("Exit the Market at Night", "gMarketSneak", true, false);
-            UIWidgets::Tooltip("Allows exiting Hyrule Castle Market Town to Hyrule Field at night by speaking "
-            "to the guard next to the gate.");
+            UIWidgets::Tooltip("Allows exiting Hyrule Castle Market Town to Hyrule Field at night\nby speaking to the guard next to the gate.");
             UIWidgets::PaddedEnhancementCheckbox("Gold Skulltulas During the Day", "gNightGSAlwaysSpawn", true, false);
             UIWidgets::Tooltip("Nighttime Skulltulas will spawn during both day and night.");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
@@ -1073,10 +1079,17 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Allows equipping the tunic and boots to C-buttons");
             UIWidgets::PaddedEnhancementCheckbox("Removable Tunics and Boots", "gEquipmentCanBeRemoved", true, false);
             UIWidgets::Tooltip("Allows equipment to be unequipped via the Equipment Subscreen.");
+            if (UIWidgets::PaddedEnhancementCheckbox("Removable Strength Equipment", "gToggleStrength", true, false)) {
+                if (!CVarGetInteger("gToggleStrength", 0)) {
+                    CVarSetInteger("gStrengthDisabled", 0);
+                }
+            }
+            UIWidgets::Tooltip("Allows strength upgrades to be toggled on and off by pressing A on the strength upgrade in the Equipment Subscreen.\n(This allows performing some glitches that require the player to not have strength).");
+            
             UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
             UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
             UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-            UIWidgets::Tooltip("Allow the Bow and magic arrows to be equipped at the same time on different slots");
+            UIWidgets::Tooltip("Allow the Bow and magic arrows to be equipped at the same time on different slots.\n(Note: this disables the behaviour of the 'Equip Dupe' glitch).");
             UIWidgets::PaddedEnhancementCheckbox("Skip Magic Arrow Equip Animation", "gSkipArrowAnimation", true, false);
             UIWidgets::PaddedSeparator();
 
@@ -1206,7 +1219,6 @@ void DrawEnhancementsMenu() {
                     ImGui::EndMenu();
                 }
             }
-
             ImGui::EndMenu();
         }
 
@@ -1254,7 +1266,7 @@ void DrawEnhancementsMenu() {
             LUS::Switch::ApplyOverclock();
         }
         #endif
-
+        ImGui::EndDisabled();
         ImGui::EndMenu();
     }
 }
@@ -1262,6 +1274,7 @@ void DrawEnhancementsMenu() {
 void DrawCheatsMenu() {
     if (ImGui::BeginMenu("Cheats"))
     {
+        ImGui::BeginDisabled(CVarGetInteger("gDisableChangingSettings", 0));
         if (ImGui::BeginMenu("Infinite...")) {
             UIWidgets::EnhancementCheckbox("Money", "gInfiniteMoney");
             UIWidgets::PaddedEnhancementCheckbox("Health", "gInfiniteHealth", true, false);
@@ -1483,7 +1496,7 @@ void DrawCheatsMenu() {
             GameInteractor::RawAction::ClearCutscenePointer();
         }
         UIWidgets::Tooltip("Clears the cutscene pointer to a value safe for wrong warps.");
-
+        ImGui::EndDisabled();
         ImGui::EndMenu();
     }
 }
@@ -1497,6 +1510,7 @@ extern std::shared_ptr<DLViewerWindow> mDLViewerWindow;
 
 void DrawDeveloperToolsMenu() {
     if (ImGui::BeginMenu("Developer Tools")) {
+        ImGui::BeginDisabled(CVarGetInteger("gDisableChangingSettings", 0));
         UIWidgets::EnhancementCheckbox("OoT Debug Mode", "gDebugEnabled");
         UIWidgets::Tooltip("Enables Debug Mode, allowing you to select maps with L + R + Z, noclip with L + D-pad Right, and open the debug menu with L on the pause screen");
         if (CVarGetInteger("gDebugEnabled", 0)) {
@@ -1568,7 +1582,7 @@ void DrawDeveloperToolsMenu() {
 
         ImGui::PopStyleVar(3);
         ImGui::PopStyleColor(1);
-
+        ImGui::EndDisabled();
         ImGui::EndMenu();
     }
 }
