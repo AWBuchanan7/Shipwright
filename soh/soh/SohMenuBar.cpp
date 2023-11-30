@@ -617,12 +617,9 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedEnhancementCheckbox("Instant Item Putaway", "gInstantPutaway", true, false);
-                UIWidgets::Tooltip("Allow Link to put items away without having to wait around");
+                UIWidgets::Tooltip("Allow Link to put items away without having to wait around.");
                 UIWidgets::PaddedEnhancementCheckbox("Instant Boomerang Recall", "gFastBoomerang", true, false);
-                UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air");
-                UIWidgets::PaddedEnhancementCheckbox("Use Sword & Bombchus Underwater", "gEnhancedIronBoots", true, false);
-                UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
-                
+                UIWidgets::Tooltip("Instantly return the boomerang to Link by pressing its item button while it's in the air.");
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedEnhancementCheckbox("Fix Anubis Fireballs", "gAnubisFix", true, false);
@@ -635,49 +632,21 @@ void DrawEnhancementsMenu() {
                         CVarClear("gCrouchStabFix");
                     }
                 }
-                UIWidgets::Tooltip("Make the Megaton Hammer's crouch stab able to destroy rocks without first swinging it normally");
+                UIWidgets::Tooltip("Make the Megaton Hammer's crouch stab able to destroy rocks without first swinging it normally.");
                 if (CVarGetInteger("gCrouchStabHammerFix", 0)) {
                     UIWidgets::PaddedEnhancementCheckbox("Remove Power Crouch Stab", "gCrouchStabFix", true, false);
-                    UIWidgets::Tooltip("Make crouch stabbing always do the same damage as a regular slash");
+                    UIWidgets::Tooltip("Make crouch stabbing always do the same damage as a regular slash.");
                 }
                 ImGui::EndMenu();
             }
 
             UIWidgets::Spacer(0);
 
-            if (ImGui::BeginMenu("Time Savers"))
-            {
-                UIWidgets::PaddedEnhancementSliderInt("Text Speed: %dx", "##TEXTSPEED", "gTextSpeed", 1, 5, "", 1, true, false, true);
-                UIWidgets::PaddedEnhancementCheckbox("B to Skip Text", "gSkipText", false, true);
-                UIWidgets::Tooltip("Holding down B skips text");
-                UIWidgets::PaddedEnhancementSliderInt("King Zora Speed: %dx", "##MWEEPSPEED", "gMweepSpeed", 1, 5, "", 1, true, false, true);
-                UIWidgets::PaddedEnhancementSliderInt("Biggoron Forge Time: %d days", "##FORGETIME", "gForgeTime", 0, 3, "", 3, true, false, true);
-                UIWidgets::Tooltip("Allows you to change the number of days it takes for Biggoron to forge the Biggoron Sword");
-                UIWidgets::PaddedSeparator();
-
-                UIWidgets::PaddedEnhancementSliderInt("Vine/Ladder Climb Speed +%d", "##CLIMBSPEED", "gClimbSpeed", 0, 12, "", 0, true, false, true);
-                UIWidgets::PaddedEnhancementSliderInt("Block Pushing Speed +%d", "##BLOCKSPEED", "gFasterBlockPush", 0, 5, "", 0, true, false, true);
-                UIWidgets::PaddedEnhancementCheckbox("Faster Heavy Block Lift", "gFasterHeavyBlockLift", true, false);
-                UIWidgets::Tooltip("Speeds up lifting silver rocks and obelisks");
-                UIWidgets::PaddedEnhancementCheckbox("Faster Chest Opening", "gFastChests", true, false);
-                UIWidgets::Tooltip("Kick open every chest");
-                UIWidgets::PaddedEnhancementCheckbox("Faster Ocarina Playback", "gFastOcarinaPlayback", true, false);
-                UIWidgets::PaddedSeparator();
-                UIWidgets::PaddedEnhancementCheckbox("Skip Take Breath Animation After Diving", "gSkipSwimDeepEndAnim", true, false);
-                UIWidgets::Tooltip("Skips Link's taking breath animation after coming up from water.\n\nThis setting does not interfere with getting items from underwater.");
-
-                bool forceSkipScarecrow = IS_RANDO &&
-                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SKIP_SCARECROWS_SONG);
-                static const char* forceSkipScarecrowText =
-                    "This setting is forcefully enabled because a savefile\nwith \"Skip Scarecrow Song\" is loaded";
-                UIWidgets::Tooltip("Skip the part where the Ocarina playback is called when you play a song");
-                UIWidgets::PaddedEnhancementCheckbox("Skip Scarecrow Song", "gSkipScarecrow", true, false,
-                                                        forceSkipScarecrow, forceSkipScarecrowText, UIWidgets::CheckboxGraphics::Checkmark);
-                UIWidgets::Tooltip("Pierre appears when Ocarina is pulled out. Requires learning scarecrow song.");
-                UIWidgets::PaddedEnhancementCheckbox("Skip 'Game Saved' Confirmation", "gSkipSaveConfirmation", true, false);
-                UIWidgets::Tooltip("Skip the \"Game saved.\" confirmation screen.");
-                UIWidgets::PaddedEnhancementCheckbox("Skip Item Pickup Messages", "gFastDrops", true, false);
-                UIWidgets::Tooltip("Skip pickup messages for new consumable items and bottle swipes.");
+            if (ImGui::BeginMenu("Open World")) {
+                UIWidgets::PaddedEnhancementCheckbox("Water Temple - Remove Bow Requirement", "gCompleteWaterTempleWithoutBow", true, false);
+                UIWidgets::Tooltip("Removes switches requiring the Bow to progress through the Water Temple.");
+                UIWidgets::PaddedEnhancementCheckbox("Require All Six Medallions To Enter Ganon's Castle", "gAllMedallionsCheckForGanonsCastle", true, false);
+                UIWidgets::Tooltip("Require all six medallions to enter Ganon's Castle.\nNormally the game only checks for the Spirit and Shadow medallions.");
                 ImGui::EndMenu();
             }
 
@@ -699,11 +668,11 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::EnhancementCheckbox("Mute Low HP Alarm", "gLowHpAlarm");
-                UIWidgets::Tooltip("Disable the low HP beeping sound");
+                UIWidgets::Tooltip("Disable the low HP beeping sound.");
                 UIWidgets::PaddedEnhancementCheckbox("Mute Navi Call", "gDisableNaviCallAudio", true, false);
-                UIWidgets::Tooltip("Disables the voice audio when Navi calls you");
+                UIWidgets::Tooltip("Disables the voice audio when Navi calls you.");
                 UIWidgets::PaddedSeparator();
-                
+
                 UIWidgets::PaddedEnhancementCheckbox("Ask to Equip New Items", "gAskToEquip", true, false);
                 UIWidgets::Tooltip("Adds a prompt to equip newly-obtained swords, shields and tunics.");
                 UIWidgets::PaddedEnhancementCheckbox("Display Item Counts in Messages", "gInjectItemCounts", true, false);
@@ -711,7 +680,7 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedEnhancementCheckbox("Disable Forced Navi Conversations", "gNoForcedNavi", true, false);
                 UIWidgets::Tooltip("Prevent forced Navi conversations");
                 UIWidgets::PaddedEnhancementCheckbox("Disable Gold Skulltula Freeze", "gSkulltulaFreeze", true, false);
-                UIWidgets::Tooltip("Stops the game from freezing the player when picking up Gold Skulltulas");
+                UIWidgets::Tooltip("Stops the game from freezing the player when picking up Gold Skulltulas.");
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedText("Chest Size & Texture Matches Contents", true, false);
@@ -738,7 +707,7 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedSeparator();
 
                 UIWidgets::PaddedEnhancementCheckbox("Display Enemy Health Bars", "gEnemyHealthBar", true, false);
-                UIWidgets::Tooltip("Renders a health bar for enemies when Z-Targeted");
+                UIWidgets::Tooltip("Renders a health bar for enemies when Z-Targeted.");
                 UIWidgets::PaddedEnhancementCheckbox("Display Guards Vision", "gGuardVision", true, false);
                 UIWidgets::PaddedSeparator();
 
@@ -747,6 +716,44 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedEnhancementCheckbox("Prevent Dropped Ocarina Inputs", "gDpadNoDropOcarinaInput", true, false);
                 UIWidgets::Tooltip("Prevent dropping inputs when playing the ocarina quickly.");
 
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Time Savers"))
+            {
+                UIWidgets::PaddedEnhancementSliderInt("Text Speed: %dx", "##TEXTSPEED", "gTextSpeed", 1, 5, "", 1, true, false, true);
+                UIWidgets::PaddedEnhancementCheckbox("B to Skip Text", "gSkipText", false, true);
+                UIWidgets::Tooltip("Holding down B skips text");
+                UIWidgets::PaddedEnhancementSliderInt("King Zora Speed: %dx", "##MWEEPSPEED", "gMweepSpeed", 1, 5, "", 1, true, false, true);
+                UIWidgets::PaddedEnhancementSliderInt("Biggoron Forge Time: %d days", "##FORGETIME", "gForgeTime", 0, 3, "", 3, true, false, true);
+                UIWidgets::Tooltip("Allows you to change the number of days it takes for Biggoron to forge the Biggoron Sword");
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::PaddedEnhancementSliderInt("Vine/Ladder Climb Speed +%d", "##CLIMBSPEED", "gClimbSpeed", 0, 12, "", 0, true, false, true);
+                UIWidgets::PaddedEnhancementSliderInt("Block Pushing Speed +%d", "##BLOCKSPEED", "gFasterBlockPush", 0, 5, "", 0, true, false, true);
+                UIWidgets::PaddedEnhancementCheckbox("Faster Heavy Block Lift", "gFasterHeavyBlockLift", true, false);
+                UIWidgets::Tooltip("Speeds up lifting silver rocks and obelisks");
+                UIWidgets::PaddedEnhancementCheckbox("Faster Chest Opening", "gFastChests", true, false);
+                UIWidgets::Tooltip("Kick open every chest");
+                UIWidgets::PaddedEnhancementCheckbox("Faster Ocarina Playback", "gFastOcarinaPlayback", true, false);
+                UIWidgets::PaddedEnhancementCheckbox("Skip Take Breath Animation After Diving", "gSkipSwimDeepEndAnim", true, false);
+                UIWidgets::Tooltip("Skips Link's taking breath animation after coming up from water.\n\nThis setting does not interfere with getting items from underwater.");
+                UIWidgets::PaddedSeparator();
+
+                bool forceSkipScarecrow = IS_RANDO &&
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SKIP_SCARECROWS_SONG);
+                static const char* forceSkipScarecrowText =
+                    "This setting is forcefully enabled because a savefile\nwith \"Skip Scarecrow Song\" is loaded";
+                UIWidgets::Tooltip("Skip the part where the Ocarina playback is called when you play a song");
+                UIWidgets::PaddedEnhancementCheckbox("Skip Scarecrow Song", "gSkipScarecrow", true, false,
+                                                        forceSkipScarecrow, forceSkipScarecrowText, UIWidgets::CheckboxGraphics::Checkmark);
+                UIWidgets::Tooltip("Pierre appears when Ocarina is pulled out. Requires learning scarecrow song.");
+                UIWidgets::PaddedEnhancementCheckbox("Skip 'Game Saved' Confirmation", "gSkipSaveConfirmation", true, false);
+                UIWidgets::Tooltip("Skip the \"Game saved.\" confirmation screen.");
+                UIWidgets::PaddedEnhancementCheckbox("Skip Item Pickup Messages", "gFastDrops", true, false);
+                UIWidgets::Tooltip("Skip pickup messages for new consumable items and bottle swipes.");
                 ImGui::EndMenu();
             }
 
@@ -868,13 +875,16 @@ void DrawEnhancementsMenu() {
                 ImGui::EndMenu();
             }
 
+
             UIWidgets::Spacer(0);
             UIWidgets::PaddedSeparator();
 
             UIWidgets::PaddedEnhancementCheckbox("Timeless Equipment", "gTimelessEquipment", true, false);
-            UIWidgets::Tooltip("Allows any item to be equipped, regardless of age.\nAlso allows young Link to use adult strength upgrades");
-            UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false, (CVarGetInteger("gTimelessEquipment", 0) == 0), "Requires Timeless Equipment", UIWidgets::CheckboxGraphics::Cross, false);
+            UIWidgets::Tooltip("Allows any item to be equipped, regardless of age.\nAlso allows young Link to use adult strength upgrades.");
+            UIWidgets::PaddedEnhancementCheckbox("Use Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false, (CVarGetInteger("gTimelessEquipment", 0) == 0), "Requires Timeless Equipment", UIWidgets::CheckboxGraphics::Cross, false);
             UIWidgets::Tooltip("Allows child to use Bow with arrows.\nAllows adult to use Slingshot with seeds.");
+            UIWidgets::PaddedEnhancementCheckbox("Use Sword & Bombchus Underwater", "gEnhancedIronBoots", true, false);
+            UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus while underwater with the Iron Boots.");
             UIWidgets::PaddedSeparator();
 
             UIWidgets::PaddedText("Bunny Hood Effect", true, false);
@@ -917,15 +927,14 @@ void DrawEnhancementsMenu() {
             UIWidgets::PaddedEnhancementCheckbox("Gold Skulltulas During the Day", "gNightGSAlwaysSpawn", true, false);
             UIWidgets::Tooltip("Nighttime Skulltulas will spawn during both day and night.");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
-            UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
+            UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods.");
             UIWidgets::PaddedEnhancementCheckbox("Pull Graves During the Day", "gDayGravePull", true, false);
-            UIWidgets::Tooltip("Allows graves to be pulled when child during the day");
+            UIWidgets::Tooltip("Allows graves to be pulled when child during the day.");
             UIWidgets::PaddedSeparator();
 
             UIWidgets::PaddedText("Time Travel with the Song of Time", true, false);
             UIWidgets::EnhancementCombobox("gTimeTravel", timeTravelOptions, 0);
-            UIWidgets::Tooltip("Allows Link to freely change age by playing the Song of Time.\n"
-                "Time Blocks can still be used properly.\n\n"
+            UIWidgets::Tooltip("Allows Link to freely change age by playing the Song of Time. Time Blocks can still be used properly.\n\n"
                 "Requirements:\n"
                 "- Obtained the Ocarina of Time (depends on selection)\n"
                 "- Obtained the Song of Time\n"
@@ -1085,7 +1094,7 @@ void DrawEnhancementsMenu() {
                 }
             }
             UIWidgets::Tooltip("Allows strength upgrades to be toggled on and off by pressing A on the strength upgrade in the Equipment Subscreen.\n(This allows performing some glitches that require the player to not have strength).");
-            
+
             UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
             UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
             UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
