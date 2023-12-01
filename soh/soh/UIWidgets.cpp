@@ -214,6 +214,10 @@ namespace UIWidgets {
         }
         return changed;
     }
+    
+    bool DefaultEnhancementCheckbox(const char* text, const char* cvarName, bool defaultValue) {
+        return PaddedEnhancementCheckbox(text, cvarName, true, false, false, "", UIWidgets::CheckboxGraphics::Cross, defaultValue);
+    }
 
     bool PaddedEnhancementCheckbox(const char* text, const char* cvarName, bool padTop, bool padBottom, bool disabled, const char* disabledTooltipText, CheckboxGraphics disabledGraphic, bool defaultValue) {
         ImGui::BeginGroup();

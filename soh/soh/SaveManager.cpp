@@ -527,6 +527,9 @@ void SaveManager::InitFileNormal() {
     gSaveContext.equips.equipment = 0x1100;
 
     // Inventory
+    for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.newItems); item++) {
+        gSaveContext.inventory.newItems[item] = ITEM_NONE;
+    }
     for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.items); item++) {
         gSaveContext.inventory.items[item] = ITEM_NONE;
     }
@@ -685,6 +688,15 @@ void SaveManager::InitFileDebug() {
     gSaveContext.equips.equipment = 0x1122;
 
     // Inventory
+    static std::array<u8, 24> sNewItems = {
+        NEW_ITEM_1,     NEW_ITEM_2,         NEW_ITEM_3,        NEW_ITEM_4,       NEW_ITEM_5,       NEW_ITEM_6,
+        NEW_ITEM_7,     NEW_ITEM_8,         NEW_ITEM_9,        NEW_ITEM_10,      NEW_ITEM_11,      NEW_ITEM_12,
+        NEW_ITEM_13,    NEW_ITEM_14,        NEW_ITEM_15,       NEW_ITEM_16,      NEW_ITEM_17,      NEW_ITEM_18,
+        NEW_ITEM_19,    NEW_ITEM_20,        NEW_ITEM_21,       NEW_ITEM_22,      NEW_ITEM_23,      NEW_ITEM_24,
+    };
+    for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.newItems); item++) {
+        gSaveContext.inventory.newItems[item] = sNewItems[item];
+    }
     static std::array<u8, 24> sItems = {
         ITEM_STICK,     ITEM_NUT,           ITEM_BOMB,         ITEM_BOW,         ITEM_ARROW_FIRE,  ITEM_DINS_FIRE,
         ITEM_SLINGSHOT, ITEM_OCARINA_FAIRY, ITEM_BOMBCHU,      ITEM_HOOKSHOT,    ITEM_ARROW_ICE,   ITEM_FARORES_WIND,
@@ -1217,6 +1229,9 @@ void SaveManager::LoadBaseVersion1() {
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
     SaveManager::Instance->LoadStruct("inventory", []() {
+        SaveManager::Instance->LoadArray("newItems", ARRAY_COUNT(gSaveContext.inventory.newItems), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.newItems[i]);
+        });
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i]);
         });
@@ -1362,6 +1377,9 @@ void SaveManager::LoadBaseVersion2() {
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
     SaveManager::Instance->LoadStruct("inventory", []() {
+        SaveManager::Instance->LoadArray("newItems", ARRAY_COUNT(gSaveContext.inventory.newItems), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.newItems[i]);
+        });
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i]);
         });
@@ -1578,6 +1596,9 @@ void SaveManager::LoadBaseVersion3() {
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
     SaveManager::Instance->LoadStruct("inventory", []() {
+        SaveManager::Instance->LoadArray("newItems", ARRAY_COUNT(gSaveContext.inventory.newItems), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.newItems[i]);
+        });
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i]);
         });
@@ -1799,6 +1820,9 @@ void SaveManager::LoadBaseVersion4() {
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
     SaveManager::Instance->LoadStruct("inventory", []() {
+        SaveManager::Instance->LoadArray("newItems", ARRAY_COUNT(gSaveContext.inventory.newItems), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.newItems[i]);
+        });
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i]);
         });
@@ -2221,7 +2245,8 @@ typedef struct {
 } ItemEquips_v0; // size = 0x0A
 
 typedef struct {
-    /* 0x00 */ u8 items[24];
+    /* 0x00 */ u8 newItems[24];
+               u8 items[24];
     /* 0x18 */ s8 ammo[16];
     /* 0x28 */ u16 equipment;
     /* 0x2C */ u32 upgrades;
@@ -2445,6 +2470,9 @@ void CopyV0Save(SaveContext_v0& src, SaveContext& dst) {
         dst.equips.cButtonSlots[i] = src.equips.cButtonSlots[i];
     }
     dst.equips.equipment = src.equips.equipment;
+    for (size_t i = 0; i < ARRAY_COUNT(src.inventory.newItems); i++) {
+        dst.inventory.newItems[i] = src.inventory.newItems[i];
+    }
     for (size_t i = 0; i < ARRAY_COUNT(src.inventory.items); i++) {
         dst.inventory.items[i] = src.inventory.items[i];
     }

@@ -127,7 +127,7 @@ void func_8083377C(PlayState* play, Player* this);
 void func_808337D4(PlayState* play, Player* this);
 void func_80833910(PlayState* play, Player* this);
 void func_80833984(PlayState* play, Player* this);
-void Player_InitItemAction(PlayState* play, Player* this, s8 itemAction);
+void Player_InitItemAction(PlayState* play, Player* this, s16 itemAction);
 s32 func_8083485C(Player* this, PlayState* play);
 s32 func_808349DC(Player* this, PlayState* play);
 s32 Player_UpperAction_ChangeHeldItem(Player* this, PlayState* play);
@@ -1466,6 +1466,65 @@ static LinkAnimationHeader* D_808543D4[] = {
     &gPlayerAnim_link_hook_wait,
 };
 
+void *getUpperBodyFunction(s16 actionParam) {
+    if (actionParam >= PLAYER_IA_MELEE_START && actionParam <= PLAYER_IA_MELEE_END) {
+        // note that swords use func_808349DC
+        return func_8083485C;
+    } else if (NewItem_IsActionParamBow(actionParam)) {
+        //hold fps item
+        return func_8083501C;
+    } else if (actionParam >= PLAYER_IA_BOTTLE_START && actionParam <= PLAYER_IA_BOTTLE_END) {
+        return func_8083485C;
+    } else if (actionParam >= PLAYER_IA_TI_START && actionParam <= PLAYER_IA_TI_END) {
+        return func_8083485C;
+    } else if (actionParam >= PLAYER_IA_MELEE_START) {
+        switch (actionParam) {
+            // first case here just to show format, delete when unique items are added
+            case PLAYER_IA_UNIQUE_START:
+                return sItemActionUpdateFuncs[PLAYER_IA_NONE];
+            default:
+                return sItemActionUpdateFuncs[PLAYER_IA_NONE];
+        }
+    } else {
+        return sItemActionUpdateFuncs[actionParam];
+    }
+}
+
+void callItemChangeSetupFunction(PlayState* play, Player* this, s16 actionParam) {
+    if (actionParam >= PLAYER_IA_MELEE_START && actionParam <= PLAYER_IA_MELEE_END) {
+        // melee weapons tend to have their own setup function
+        switch (actionParam) {
+            default:
+                //do nothing type 2
+                sItemActionInitFuncs[PLAYER_IA_HAMMER](play, this);
+                return;
+        }
+    } else if (actionParam >= PLAYER_IA_BOW_START && actionParam <= PLAYER_IA_BOW_END) {
+        //setup bow/slingshot
+        func_8083379C(play, this);
+        return;
+    } else if (actionParam >= PLAYER_IA_BOTTLE_START && actionParam <= PLAYER_IA_BOTTLE_END) {
+        func_80833770(play, this);
+        return;
+    } else if (actionParam >= PLAYER_IA_TI_START && actionParam <= PLAYER_IA_TI_END) {
+        func_80833770(play, this);
+        return;
+    } else if (actionParam >= PLAYER_IA_MELEE_START) {
+        switch (actionParam) {
+            // first case here just to show format, delete when unique items are added
+            case PLAYER_IA_UNIQUE_START:
+                sItemActionInitFuncs[PLAYER_IA_NONE](play, this);
+                return;
+            default:
+                sItemActionInitFuncs[PLAYER_IA_NONE](play, this);
+                return;
+        }
+    } else {
+        sItemActionInitFuncs[actionParam](play, this);
+        return;
+    }
+}
+
 void Player_ZeroSpeedXZ(Player* this) {
     this->actor.speedXZ = 0.0f;
     this->linearVelocity = 0.0f;
@@ -1567,6 +1626,7 @@ void func_80832440(PlayState* play, Player* this) {
     this->unk_845 = this->unk_844 = 0;
 }
 
+// Unequip item
 s32 func_80832528(PlayState* play, Player* this) {
     if (this->heldItemAction >= PLAYER_IA_FISHING_POLE) {
         Player_UseItem(play, this, ITEM_NONE);
@@ -2009,7 +2069,7 @@ void Player_SetUpperActionFunc(Player* this, UpperActionFunc arg1) {
     func_808326F0(this);
 }
 
-void Player_InitItemActionWithAnim(PlayState* play, Player* this, s8 itemAction) {
+void Player_InitItemActionWithAnim(PlayState* play, Player* this, s16 itemAction) { // [WARN]: itemAction s8/s16
     LinkAnimationHeader* current = this->skelAnime.animation;
     LinkAnimationHeader** iter = &D_80853914[0][this->modelAnimType];
     u32 animGroup;
@@ -2030,13 +2090,15 @@ void Player_InitItemActionWithAnim(PlayState* play, Player* this, s8 itemAction)
     }
 }
 
-s8 Player_ItemToItemAction(s32 item) {
+s16 Player_ItemToItemAction(s32 item) {
     if (item >= ITEM_NONE_FE) {
         return PLAYER_IA_NONE;
     } else if (item == ITEM_LAST_USED) {
         return PLAYER_IA_LAST_USED;
     } else if (item == ITEM_FISHING_POLE) {
         return PLAYER_IA_FISHING_POLE;
+    } else if (item > ITEM_NUT_UPGRADE_40) {
+        return NewItem_ItemToActionParam(item);
     } else {
         return sItemActions[item];
     }
@@ -2112,7 +2174,7 @@ void func_80833984(PlayState* play, Player* this) {
     this->stateFlags1 |= PLAYER_STATE1_BOOMERANG_IN_HAND;
 }
 
-void Player_InitItemAction(PlayState* play, Player* this, s8 itemAction) {
+void Player_InitItemAction(PlayState* play, Player* this, s16 itemAction) { // [WARN]: itemAction s8/s16
     this->unk_860 = 0;
     this->unk_85C = 0.0f;
     this->unk_858 = 0.0f;
@@ -2122,7 +2184,8 @@ void Player_InitItemAction(PlayState* play, Player* this, s8 itemAction) {
 
     this->stateFlags1 &= ~(PLAYER_STATE1_ITEM_IN_HAND | PLAYER_STATE1_BOOMERANG_IN_HAND);
 
-    sItemActionInitFuncs[itemAction](play, this);
+    callItemChangeSetupFunction(play, this, itemAction);
+    // sItemActionInitFuncs[itemAction](play, this);
 
     Player_SetModelGroup(this, this->modelGroup);
 }
@@ -2336,7 +2399,7 @@ void Player_StartChangingHeldItem(Player* this, PlayState* play) {
     f32 endFrame;
     f32 playSpeed;
     s32 itemChangeType;
-    s8 heldItemAction;
+    s16 heldItemAction; // [WARN]: itemAction s8/s16
     s32 nextAnimType;
 
     heldItemAction = Player_ItemToItemAction(this->heldItemId);
@@ -2405,7 +2468,7 @@ s32 func_80834380(PlayState* play, Player* this, s32* itemPtr, s32* typePtr) {
         if (this->stateFlags1 & PLAYER_STATE1_ON_HORSE) {
             *typePtr = ARROW_NORMAL_HORSE;
         } else {
-            *typePtr = this->heldItemAction - 6;
+            *typePtr = NewItem_ActionParamToArrowType(this->heldItemAction);
         }
     } else {
         *itemPtr = ITEM_SLINGSHOT;
@@ -2427,7 +2490,7 @@ s32 func_8083442C(Player* this, PlayState* play) {
     s32 arrowType;
     s32 magicArrowType;
 
-    if ((this->heldItemAction >= PLAYER_IA_BOW_FIRE) && (this->heldItemAction <= PLAYER_IA_BOW_0E) &&
+    if ((NewItem_IsActionParamBow(this->heldItemAction)) &&
         (gSaveContext.magicState != MAGIC_STATE_IDLE)) {
         func_80078884(NA_SE_SY_ERROR);
     } else {
@@ -2443,8 +2506,8 @@ s32 func_8083442C(Player* this, PlayState* play) {
                 magicArrowType = arrowType - ARROW_FIRE;
 
                 if (this->unk_860 >= 0) {
-                    if ((magicArrowType >= 0) && (magicArrowType <= 2) &&
-                        !Magic_RequestChange(play, sMagicArrowCosts[magicArrowType], MAGIC_CONSUME_NOW)) {
+                    if ((((magicArrowType >= 0) && (magicArrowType <= 2)) || ((arrowType >= ARROW_START) && (arrowType <= ARROW_END))) &&
+                        !Magic_RequestChange(play, NewItem_GetMagicArrowCost(arrowType), MAGIC_CONSUME_NOW)) {
                         arrowType = ARROW_NORMAL;
                     }
 
@@ -2580,7 +2643,7 @@ s32 Player_UpperAction_ChangeHeldItem(Player* this, PlayState* play) {
         ((Player_ItemToItemAction(this->heldItemId) == this->heldItemAction) &&
          (sUseHeldItem = (sUseHeldItem ||
                         ((this->modelAnimType != PLAYER_ANIMTYPE_3) && (play->shootingGalleryStatus == 0)))))) {
-        Player_SetUpperActionFunc(this, sItemActionUpdateFuncs[this->heldItemAction]);
+        Player_SetUpperActionFunc(this, getUpperBodyFunction(this->heldItemAction));
         this->unk_834 = 0;
         this->unk_6AC = 0;
         sHeldItemButtonIsHeldDown = sUseHeldItem;
@@ -2631,7 +2694,7 @@ s32 func_80834C74(Player* this, PlayState* play) {
     sUseHeldItem = sHeldItemButtonIsHeldDown;
 
     if (sUseHeldItem || LinkAnimation_Update(play, &this->upperSkelAnime)) {
-        Player_SetUpperActionFunc(this, sItemActionUpdateFuncs[this->heldItemAction]);
+        Player_SetUpperActionFunc(this, getUpperBodyFunction(this->heldItemAction));
         LinkAnimation_PlayLoop(play, &this->upperSkelAnime, GET_PLAYER_ANIM(PLAYER_ANIMGROUP_wait, this->modelAnimType));
         this->unk_6AC = 0;
         this->upperActionFunc(this, play);
@@ -3153,7 +3216,7 @@ void Player_DestroyHookshot(Player* this) {
 }
 
 void Player_UseItem(PlayState* play, Player* this, s32 item) {
-    s8 itemAction;
+    s16 itemAction; // [WARN]: itemAction s8/s16
     s32 temp;
     s32 nextAnimType;
 
@@ -3170,7 +3233,7 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
              ((itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT) ||
               (CVarGetInteger("gEnhancedIronBoots", 0) &&
                ((Player_ActionToMeleeWeapon(itemAction) != 0) || (itemAction == PLAYER_IA_BOMBCHU))))) ||
-            ((itemAction >= PLAYER_IA_SHIELD_DEKU) && (itemAction <= PLAYER_IA_BOOTS_HOVER))
+            (NewItem_IsActionParamEquipment(itemAction))
            )
         {
 
@@ -3184,7 +3247,34 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
                 return;
             }
 
-            if (itemAction >= PLAYER_IA_SHIELD_DEKU) {
+            // [TO-DO]: Double-check I haven't broken anything here.
+            
+            // if (NewItem_IsActionParamBoots(itemAction)) {
+            //     u16 bootsValue = NewItem_ActionParamToBoots(itemAction);
+            //     if (CUR_EQUIP_VALUE(EQUIP_BOOTS) == bootsValue) {
+            //         Inventory_ChangeEquipment(EQUIP_BOOTS, PLAYER_BOOTS_KOKIRI + 1);
+            //     } else {
+            //         Inventory_ChangeEquipment(EQUIP_BOOTS, bootsValue);
+            //     }
+            //     Player_SetEquipmentData(play, this);
+            //     func_808328EC(this, CUR_EQUIP_VALUE(EQUIP_BOOTS) == PLAYER_BOOTS_IRON + 1 ? NA_SE_PL_WALK_HEAVYBOOTS
+            //                                                                               : NA_SE_PL_CHANGE_ARMS);
+            //     return;
+            // }
+
+            // if (NewItem_IsActionParamTunic(itemAction)) {
+            //     u16 tunicValue = NewItem_ActionParamToTunic(itemAction);
+            //     if (CUR_EQUIP_VALUE(EQUIP_TUNIC) == tunicValue) {
+            //         Inventory_ChangeEquipment(EQUIP_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
+            //     } else {
+            //         Inventory_ChangeEquipment(EQUIP_TUNIC, tunicValue);
+            //     }
+            //     Player_SetEquipmentData(play, this);
+            //     func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
+            //     return;
+            // }
+                
+            if (NewItem_IsActionParamShield(itemAction)) {
                 // Changing shields through action commands is unimplemented
                 // Boots and tunics handled previously
                 return;
@@ -3226,11 +3316,11 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
                 return;
             }
 
-            if (itemAction >= PLAYER_IA_MASK_KEATON) {
+            if (NewItem_IsActionParamMask(itemAction)) {
                 if (this->currentMask != PLAYER_MASK_NONE) {
                     this->currentMask = PLAYER_MASK_NONE;
                 } else {
-                    this->currentMask = itemAction - PLAYER_IA_MASK_KEATON + 1;
+                    this->currentMask = NewItem_ActionParamToMask(itemAction);
                 }
                 sMaskMemory = this->currentMask;
                 func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
@@ -3240,7 +3330,7 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
             if (((itemAction >= PLAYER_IA_OCARINA_FAIRY) && (itemAction <= PLAYER_IA_OCARINA_OF_TIME)) ||
                 (itemAction >= PLAYER_IA_BOTTLE_FISH)) {
                 if (!func_8008E9C4(this) ||
-                    ((itemAction >= PLAYER_IA_BOTTLE_POTION_RED) && (itemAction <= PLAYER_IA_BOTTLE_FAIRY))) {
+                    NewItem_IsActionParamBottledConsumable(itemAction)) {
                     func_8002D53C(play, &play->actorCtx.titleCtx);
                     this->unk_6AD = 4;
                     this->itemAction = itemAction;
@@ -3257,8 +3347,8 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
                     (sItemChangeTypes[gPlayerModelTypes[this->modelGroup][PLAYER_MODELGROUPENTRY_ANIM]][nextAnimType] !=
                      PLAYER_ITEM_CHG_0) &&
                     (!CVarGetInteger("gSeparateArrows", 0) ||
-                     itemAction < PLAYER_IA_BOW || itemAction > PLAYER_IA_BOW_0E ||
-                     this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_0E)) {
+                     !NewItem_IsActionParamBow(itemAction) ||
+                     !NewItem_IsActionParamBow(this->heldItemAction))) {
                     this->heldItemId = item;
                     this->stateFlags1 |= PLAYER_STATE1_START_PUTAWAY;
                 } else {
@@ -5373,11 +5463,12 @@ s32 func_8083B040(Player* this, PlayState* play) {
                     return 1;
                 }
 
-                sp2C = this->itemAction - PLAYER_IA_ZELDAS_LETTER;
+                sp2C = NewItem_GetCutsceneItem(this->itemAction);
                 if ((sp2C >= 0) ||
                     (sp28 = Player_ActionToBottle(this, this->itemAction) - 1,
-                     ((sp28 >= 0) && (sp28 < 6) &&
-                      ((this->itemAction > PLAYER_IA_BOTTLE_POE) ||
+                    // [TO-DO]: Verify behaviour unchanged; was (this->itemAction > PLAYER_IA_BOTTLE_POE)
+                     (NewItem_IsActionParamBottledSellable(this->itemAction) &&
+                      (NewItem_IsActionParamBottledExchange(this->itemAction) ||
                        ((this->targetActor != NULL) &&
                         (((this->itemAction == PLAYER_IA_BOTTLE_POE) && (this->exchangeItemId == EXCH_ITEM_POE)) ||
                          (this->exchangeItemId == EXCH_ITEM_BLUE_FIRE))))))) {
@@ -5396,11 +5487,7 @@ s32 func_8083B040(Player* this, PlayState* play) {
 
                         this->stateFlags1 |= PLAYER_STATE1_TEXT_ON_SCREEN | PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
 
-                        if (sp2C >= 0) {
-                            sp2C = sp2C + 1;
-                        } else {
-                            sp2C = sp28 + 0x18;
-                        }
+                        sp2C = NewItem_GetExchangeItem(sp2C, sp28);
 
                         targetActor = this->targetActor;
 
@@ -13498,9 +13585,10 @@ void func_8084E9AC(Player* this, PlayState* play) {
     }
 }
 
-static u8 D_808549FC[] = {
-    0x01, 0x03, 0x02, 0x04, 0x04,
-};
+// No longer used(?)
+// static u8 D_808549FC[] = {
+//     0x01, 0x03, 0x02, 0x04, 0x04,
+// };
 
 void func_8084EAC0(Player* this, PlayState* play) {
     if (LinkAnimation_Update(play, &this->skelAnime)) {
@@ -13522,8 +13610,7 @@ void func_8084EAC0(Player* this, PlayState* play) {
                     gSaveContext.healthAccumulator = rand * 0x10;
                 }
             } else {
-                s32 sp28 = D_808549FC[this->itemAction - PLAYER_IA_BOTTLE_POTION_RED];
-
+                s32 sp28 = NewItem_GetBottleDrinkEffect(this->itemAction);
                 if (CVarGetInteger("gRedPotionEffect", 0) && this->itemAction == PLAYER_IA_BOTTLE_POTION_RED) {
                     if (CVarGetInteger("gRedPercentRestore", 0)) {
                         gSaveContext.healthAccumulator =
@@ -13754,6 +13841,7 @@ void func_8084EFC0(Player* this, PlayState* play) {
         return;
     }
 
+    // [TO-DO]: NewItem_GetBottleDropInfo
     if (LinkAnimation_OnFrame(&this->skelAnime, 76.0f)) {
         BottleDropInfo* dropInfo = &D_80854A28[this->itemAction - PLAYER_IA_BOTTLE_FISH];
 

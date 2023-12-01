@@ -166,7 +166,35 @@ void* gItemIcons[] = {
     gOcarinaBtnIconCDownTex,
     gOcarinaBtnIconCLeftTex,
     gOcarinaBtnIconCRightTex,
-    gOcarinaBtnIconATex,
+    gOcarinaBtnIconATex
+};
+
+// [TO-DO]: Shift usage to use these textures for page 2 slots
+void* gNewItemIcons[] = {
+    gItemIconBombTex,                //NEW_ITEM_1
+    gItemIconSoldOutTex,             //NEW_ITEM_2
+    gItemIconSoldOutTex,             //NEW_ITEM_3
+    gItemIconSoldOutTex,             //NEW_ITEM_4
+    gItemIconSoldOutTex,             //NEW_ITEM_5
+    gItemIconSoldOutTex,             //NEW_ITEM_6
+    gItemIconSoldOutTex,             //NEW_ITEM_7
+    gItemIconSoldOutTex,             //NEW_ITEM_8
+    gItemIconSoldOutTex,             //NEW_ITEM_9
+    gItemIconSoldOutTex,             //NEW_ITEM_10
+    gItemIconSoldOutTex,             //NEW_ITEM_11
+    gItemIconSoldOutTex,             //NEW_ITEM_12
+    gItemIconSoldOutTex,             //NEW_ITEM_13
+    gItemIconSoldOutTex,             //NEW_ITEM_14
+    gItemIconSoldOutTex,             //NEW_ITEM_15
+    gItemIconSoldOutTex,             //NEW_ITEM_16
+    gItemIconSoldOutTex,             //NEW_ITEM_17
+    gItemIconSoldOutTex,             //NEW_ITEM_18
+    gItemIconSoldOutTex,             //NEW_ITEM_19
+    gItemIconSoldOutTex,             //NEW_ITEM_20
+    gItemIconSoldOutTex,             //NEW_ITEM_21
+    gItemIconSoldOutTex,             //NEW_ITEM_22
+    gItemIconSoldOutTex,             //NEW_ITEM_23
+    gItemIconSoldOutTex              //NEW_ITEM_24
 };
 
 // Used to map item IDs to inventory slots

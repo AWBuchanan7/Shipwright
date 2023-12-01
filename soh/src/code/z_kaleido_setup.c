@@ -1,13 +1,5 @@
 #include "global.h"
 
-s16 sKaleidoSetupKscpPos0[] = { PAUSE_QUEST, PAUSE_EQUIP, PAUSE_ITEM, PAUSE_MAP };
-f32 sKaleidoSetupEyeX0[] = { 0.0f, 64.0f, 0.0f, -64.0f };
-f32 sKaleidoSetupEyeZ0[] = { -64.0f, 0.0f, 64.0f, 0.0f };
-
-s16 sKaleidoSetupKscpPos1[] = { PAUSE_MAP, PAUSE_QUEST, PAUSE_EQUIP, PAUSE_ITEM };
-f32 sKaleidoSetupEyeX1[] = { -64.0f, 0.0f, 64.0f, 0.0f };
-f32 sKaleidoSetupEyeZ1[] = { 0.0f, -64.0f, 0.0f, 64.0f };
-
 void KaleidoSetup_Update(PlayState* play) {
     PauseContext* pauseCtx = &play->pauseCtx;
     Input* input = &play->state.input[0];
@@ -49,18 +41,19 @@ void KaleidoSetup_Update(PlayState* play) {
 
             pauseCtx->unk_1EA = 0;
             pauseCtx->unk_1E4 = 1;
+            
+            pauseCtx->pageCount = 4 + CVarGetInteger("gNewPage",0);
+            pauseCtx->pageIndex = (pauseCtx->pageIndex + 1) % pauseCtx->pageCount;
+            pauseCtx->eye.x = -PAUSE_EYE_DIST * sinf(-pauseCtx->pageIndex * 2 * M_PI / pauseCtx->pageCount) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount)) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount)) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount));
+            pauseCtx->eye.z = -PAUSE_EYE_DIST * cosf(pauseCtx->pageIndex * 2 * M_PI / pauseCtx->pageCount) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount)) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount)) *
+              (sinf(M_PI /pauseCtx->pageCount) / cosf(M_PI / pauseCtx->pageCount));
 
-            if (ZREG(48) == 0) {
-                pauseCtx->eye.x = sKaleidoSetupEyeX0[pauseCtx->pageIndex];
-                pauseCtx->eye.z = sKaleidoSetupEyeZ0[pauseCtx->pageIndex];
-                pauseCtx->pageIndex = sKaleidoSetupKscpPos0[pauseCtx->pageIndex];
-            } else {
-                pauseCtx->eye.x = sKaleidoSetupEyeX1[pauseCtx->pageIndex];
-                pauseCtx->eye.z = sKaleidoSetupEyeZ1[pauseCtx->pageIndex];
-                pauseCtx->pageIndex = sKaleidoSetupKscpPos1[pauseCtx->pageIndex];
-            }
-
-            pauseCtx->mode = (u16)(pauseCtx->pageIndex * 2) + 1;
+            pauseCtx->mode = (pauseCtx->pageIndex - 1 + pauseCtx->pageCount) % pauseCtx->pageCount;
             pauseCtx->state = 1;
 
             osSyncPrintf("Ｍｏｄｅ=%d  eye.x=%f,  eye.z=%f  kscp_pos=%d\n", pauseCtx->mode, pauseCtx->eye.x,
@@ -89,19 +82,23 @@ void KaleidoSetup_Init(PlayState* play) {
     pauseCtx->alpha = 0;
     pauseCtx->unk_1EA = 0;
     pauseCtx->unk_1E4 = 0;
-    pauseCtx->mode = 0;
+    pauseCtx->pageCount = CVarGetInteger("gNewPage",0) + 4;
+    pauseCtx->mode = (PAUSE_ITEM + 1) % pauseCtx->pageCount;
     pauseCtx->pageIndex = PAUSE_ITEM;
 
+    pauseCtx->itemPage2Roll = 160.0f;
     pauseCtx->unk_1F4 = 160.0f;
     pauseCtx->unk_1F8 = 160.0f;
     pauseCtx->unk_1FC = 160.0f;
     pauseCtx->unk_200 = 160.0f;
+    pauseCtx->eye.z = -64.0f;
     pauseCtx->eye.z = 64.0f;
     pauseCtx->unk_1F0 = 936.0f;
     pauseCtx->eye.x = pauseCtx->eye.y = 0.0f;
     pauseCtx->unk_204 = -314.0f;
 
     pauseCtx->cursorPoint[PAUSE_ITEM] = 0;
+    pauseCtx->cursorPoint[PAUSE_ITEM_2] = 0;
     pauseCtx->cursorPoint[PAUSE_MAP] = VREG(30) + 3;
     pauseCtx->cursorPoint[PAUSE_QUEST] = 0;
     pauseCtx->cursorPoint[PAUSE_EQUIP] = 1;
@@ -109,6 +106,8 @@ void KaleidoSetup_Init(PlayState* play) {
 
     pauseCtx->cursorX[PAUSE_ITEM] = 0;
     pauseCtx->cursorY[PAUSE_ITEM] = 0;
+    pauseCtx->cursorX[PAUSE_ITEM_2] = 0;
+    pauseCtx->cursorY[PAUSE_ITEM_2] = 0;
     pauseCtx->cursorX[PAUSE_MAP] = 0;
     pauseCtx->cursorY[PAUSE_MAP] = 0;
     pauseCtx->cursorX[PAUSE_QUEST] = temp;
@@ -117,11 +116,13 @@ void KaleidoSetup_Init(PlayState* play) {
     pauseCtx->cursorY[PAUSE_EQUIP] = 0;
 
     pauseCtx->cursorItem[PAUSE_ITEM] = PAUSE_ITEM_NONE;
+    pauseCtx->cursorItem[PAUSE_ITEM_2] = PAUSE_ITEM_NONE;
     pauseCtx->cursorItem[PAUSE_MAP] = VREG(30) + 3;
     pauseCtx->cursorItem[PAUSE_QUEST] = PAUSE_ITEM_NONE;
     pauseCtx->cursorItem[PAUSE_EQUIP] = ITEM_SWORD_KOKIRI;
 
     pauseCtx->cursorSlot[PAUSE_ITEM] = 0;
+    pauseCtx->cursorSlot[PAUSE_ITEM_2] = 0;
     pauseCtx->cursorSlot[PAUSE_MAP] = VREG(30) + 3;
     pauseCtx->cursorSlot[PAUSE_QUEST] = 0;
     pauseCtx->cursorSlot[PAUSE_EQUIP] = pauseCtx->cursorPoint[PAUSE_EQUIP];

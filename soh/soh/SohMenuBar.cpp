@@ -1004,25 +1004,26 @@ void DrawEnhancementsMenu() {
 
         if (ImGui::BeginMenu("HUD"))
         {
-            UIWidgets::PaddedEnhancementCheckbox("Minimal UI", "gMinimalUI", true, false);
+            UIWidgets::EnhancementCheckbox("Minimal UI", "gMinimalUI");
             UIWidgets::Tooltip("Hides most of the UI when not needed\nNote: Doesn't activate until after loading a new scene");
             UIWidgets::PaddedSeparator();
 
-            UIWidgets::PaddedEnhancementCheckbox("Always Show Dungeon Entrances", "gAlwaysShowDungeonMinimapIcon", true, false);
+            UIWidgets::EnhancementCheckbox("Always Show Dungeon Entrances", "gAlwaysShowDungeonMinimapIcon");
             UIWidgets::Tooltip("Always shows dungeon entrance icons on the minimap");
-            UIWidgets::PaddedEnhancementCheckbox("Display Dynamic Wallet Icon", "gDynamicWalletIcon", true, false);
+            UIWidgets::EnhancementCheckbox("Display Dynamic Wallet Icon", "gDynamicWalletIcon");
             UIWidgets::Tooltip("Changes the rupee in the wallet icon to match the wallet size you currently have");
-            UIWidgets::PaddedEnhancementCheckbox("Display Glitch Line-up Tick", "gDrawLineupTick", true, false);
-            UIWidgets::Tooltip("Displays a tick in the top center of the screen to help with glitch line-ups in SoH, as traditional UI based line-ups do not work outside of 4:3");
+            UIWidgets::EnhancementCheckbox("Display Glitch Line-up Tick", "gDrawLineupTick");
+            UIWidgets::Tooltip("Displays a tick in the top center of the screen to help with glitch line-ups in SoH."
+                "Traditional UI based line-ups do not work outside of 4:3.");
             UIWidgets::EnhancementCheckbox("Display Visual Stone of Agony", "gVisualAgony");
             UIWidgets::Tooltip("Displays an icon and plays a sound when Stone of Agony should be activated, for those without rumble");
             UIWidgets::PaddedSeparator();
 
-            UIWidgets::PaddedEnhancementCheckbox("Disable Hot/Underwater Warning Text", "gDisableTunicWarningText", true, false);
+            UIWidgets::EnhancementCheckbox("Disable Hot/Underwater Warning Text", "gDisableTunicWarningText");
             UIWidgets::Tooltip("Disables warning text when you don't have on the Goron/Zora Tunic in Hot/Underwater conditions.");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Dungeon Entrances on HUD", "gFixDungeonMinimapIcon", true, false);
+            UIWidgets::EnhancementCheckbox("Fix Dungeon Entrances on HUD", "gFixDungeonMinimapIcon");
             UIWidgets::Tooltip("Removes the dungeon entrance icon on the top-left corner of the screen when no dungeon is present on the current map");
-            UIWidgets::PaddedEnhancementCheckbox("Fix Navi Text HUD position", "gNaviTextFix", true, false);
+            UIWidgets::EnhancementCheckbox("Fix Navi Text HUD position", "gNaviTextFix");
             UIWidgets::Tooltip("Correctly centers the Navi text prompt on the HUD's C-Up button");
             ImGui::EndMenu();
         }
@@ -1031,80 +1032,104 @@ void DrawEnhancementsMenu() {
 
         if (ImGui::BeginMenu("Menus"))
         {
-            UIWidgets::PaddedEnhancementCheckbox("Link as Default Filename", "gLinkDefaultName", true, false);
-            UIWidgets::Tooltip("Allows you to have \"Link\" as a premade filename.");
-            UIWidgets::PaddedEnhancementCheckbox("More Info on File Select", "gFileSelectMoreInfo", true, false);
-            UIWidgets::Tooltip("Shows what items you have collected in the file select screen, like in N64 randomizer");
-            UIWidgets::PaddedEnhancementCheckbox("Passage of Time on File Select", "gTimeFlowFileSelect", true, false);
-            UIWidgets::PaddedSeparator();
-
-            if (ImGui::BeginMenu("Animated Link in Pause Menu")) {
-                ImGui::Text("Rotation");
-                UIWidgets::EnhancementRadioButton("Disabled", "gPauseLiveLinkRotation", 0);
-                UIWidgets::EnhancementRadioButton("Rotate Link with D-pad", "gPauseLiveLinkRotation", 1);
-                UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the D-pad\nUse D-pad Up or D-pad Down to reset Link's rotation");
-                UIWidgets::EnhancementRadioButton("Rotate Link with C-buttons", "gPauseLiveLinkRotation", 2);
-                UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the C-buttons\nUse C-Up or C-Down to reset Link's rotation");
-                UIWidgets::EnhancementRadioButton("Rotate Link with Right Stick", "gPauseLiveLinkRotation", 3);
-                UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the Right Stick\nYou can zoom in by pointing up and reset Link's rotation by pointing down");
-                if (CVarGetInteger("gPauseLiveLinkRotation", 0) != 0) {
-                    UIWidgets::EnhancementSliderInt("Rotation Speed: %d", "##MinRotationSpeed", "gPauseLiveLinkRotationSpeed", 1, 20, "", 1);
-                }
+            if (ImGui::BeginMenu("File Select Screen")) {
+                UIWidgets::EnhancementCheckbox("Link as Default Filename", "gLinkDefaultName");
+                UIWidgets::Tooltip("Autofills \"Link\" as new filenames by default.");
+                UIWidgets::EnhancementCheckbox("More Info on File Select", "gFileSelectMoreInfo");
+                UIWidgets::Tooltip("Shows what items you have collected in the file select screen, like in N64 randomizer");
+                UIWidgets::EnhancementCheckbox("Passage of Time on File Select", "gTimeFlowFileSelect");
                 UIWidgets::PaddedSeparator();
-                ImGui::Text("Static loop");
-                UIWidgets::EnhancementRadioButton("Disabled", "gPauseLiveLink", 0);
-                UIWidgets::EnhancementRadioButton("Idle (standing)", "gPauseLiveLink", 1);
-                UIWidgets::EnhancementRadioButton("Idle (look around)", "gPauseLiveLink", 2);
-                UIWidgets::EnhancementRadioButton("Idle (belt)", "gPauseLiveLink", 3);
-                UIWidgets::EnhancementRadioButton("Idle (shield)", "gPauseLiveLink", 4);
-                UIWidgets::EnhancementRadioButton("Idle (test sword)", "gPauseLiveLink", 5);
-                UIWidgets::EnhancementRadioButton("Idle (yawn)", "gPauseLiveLink", 6);
-                UIWidgets::EnhancementRadioButton("Battle Stance", "gPauseLiveLink", 7);
-                UIWidgets::EnhancementRadioButton("Walking (no shield)", "gPauseLiveLink", 8);
-                UIWidgets::EnhancementRadioButton("Walking (holding shield)", "gPauseLiveLink", 9);
-                UIWidgets::EnhancementRadioButton("Running (no shield)", "gPauseLiveLink", 10);
-                UIWidgets::EnhancementRadioButton("Running (holding shield)", "gPauseLiveLink", 11);
-                UIWidgets::EnhancementRadioButton("Hand on hip", "gPauseLiveLink", 12);
-                UIWidgets::EnhancementRadioButton("Spin attack charge", "gPauseLiveLink", 13);
-                UIWidgets::EnhancementRadioButton("Look at hand", "gPauseLiveLink", 14);
-                UIWidgets::PaddedSeparator();
-                ImGui::Text("Randomize");
-                UIWidgets::EnhancementRadioButton("Random", "gPauseLiveLink", 15);
-                UIWidgets::Tooltip("Randomize the animation played each time you open the menu");
-                UIWidgets::EnhancementRadioButton("Random cycle", "gPauseLiveLink", 16);
-                UIWidgets::Tooltip("Randomize the animation played on the menu after a certain time");
-                UIWidgets::EnhancementRadioButton("Random cycle (Idle)", "gPauseLiveLink", 17);
-                UIWidgets::Tooltip("Randomize the animation played on the menu after a certain time (Idle animations only)");
-                if (CVarGetInteger("gPauseLiveLink", 0) >= 16) {
-                    UIWidgets::EnhancementSliderInt("Frame to wait: %d", "##MinFrameCount", "gMinFrameCount", 1, 1000, "", 0);
-                }
                 ImGui::EndMenu();
             }
 
             UIWidgets::Spacer(0);
             UIWidgets::PaddedSeparator();
 
-            UIWidgets::PaddedEnhancementCheckbox("Assignable Tunics and Boots", "gAssignableTunicsAndBoots", true, false);
-            UIWidgets::Tooltip("Allows equipping the tunic and boots to C-buttons");
-            UIWidgets::PaddedEnhancementCheckbox("Removable Tunics and Boots", "gEquipmentCanBeRemoved", true, false);
-            UIWidgets::Tooltip("Allows equipment to be unequipped via the Equipment Subscreen.");
-            if (UIWidgets::PaddedEnhancementCheckbox("Removable Strength Equipment", "gToggleStrength", true, false)) {
-                if (!CVarGetInteger("gToggleStrength", 0)) {
-                    CVarSetInteger("gStrengthDisabled", 0);
+            if (ImGui::BeginMenu("Equipment Subscreen")) {
+                if (ImGui::BeginMenu("Animated Link in Pause Menu")) {
+                    ImGui::Text("Rotation");
+                    UIWidgets::EnhancementRadioButton("Disabled", "gPauseLiveLinkRotation", 0);
+                    UIWidgets::EnhancementRadioButton("Rotate Link with D-pad", "gPauseLiveLinkRotation", 1);
+                    UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the D-pad\nUse D-pad Up or D-pad Down to reset Link's rotation");
+                    UIWidgets::EnhancementRadioButton("Rotate Link with C-buttons", "gPauseLiveLinkRotation", 2);
+                    UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the C-buttons\nUse C-Up or C-Down to reset Link's rotation");
+                    UIWidgets::EnhancementRadioButton("Rotate Link with Right Stick", "gPauseLiveLinkRotation", 3);
+                    UIWidgets::Tooltip("Allow you to rotate Link on the Equipment menu with the Right Stick\nYou can zoom in by pointing up and reset Link's rotation by pointing down");
+                    if (CVarGetInteger("gPauseLiveLinkRotation", 0) != 0) {
+                        UIWidgets::EnhancementSliderInt("Rotation Speed: %d", "##MinRotationSpeed", "gPauseLiveLinkRotationSpeed", 1, 20, "", 1);
+                    }
+                    UIWidgets::PaddedSeparator();
+                    ImGui::Text("Static loop");
+                    UIWidgets::EnhancementRadioButton("Disabled", "gPauseLiveLink", 0);
+                    UIWidgets::EnhancementRadioButton("Idle (standing)", "gPauseLiveLink", 1);
+                    UIWidgets::EnhancementRadioButton("Idle (look around)", "gPauseLiveLink", 2);
+                    UIWidgets::EnhancementRadioButton("Idle (belt)", "gPauseLiveLink", 3);
+                    UIWidgets::EnhancementRadioButton("Idle (shield)", "gPauseLiveLink", 4);
+                    UIWidgets::EnhancementRadioButton("Idle (test sword)", "gPauseLiveLink", 5);
+                    UIWidgets::EnhancementRadioButton("Idle (yawn)", "gPauseLiveLink", 6);
+                    UIWidgets::EnhancementRadioButton("Battle Stance", "gPauseLiveLink", 7);
+                    UIWidgets::EnhancementRadioButton("Walking (no shield)", "gPauseLiveLink", 8);
+                    UIWidgets::EnhancementRadioButton("Walking (holding shield)", "gPauseLiveLink", 9);
+                    UIWidgets::EnhancementRadioButton("Running (no shield)", "gPauseLiveLink", 10);
+                    UIWidgets::EnhancementRadioButton("Running (holding shield)", "gPauseLiveLink", 11);
+                    UIWidgets::EnhancementRadioButton("Hand on hip", "gPauseLiveLink", 12);
+                    UIWidgets::EnhancementRadioButton("Spin attack charge", "gPauseLiveLink", 13);
+                    UIWidgets::EnhancementRadioButton("Look at hand", "gPauseLiveLink", 14);
+                    UIWidgets::PaddedSeparator();
+                    ImGui::Text("Randomize");
+                    UIWidgets::EnhancementRadioButton("Random", "gPauseLiveLink", 15);
+                    UIWidgets::Tooltip("Randomize the animation played each time you open the menu");
+                    UIWidgets::EnhancementRadioButton("Random cycle", "gPauseLiveLink", 16);
+                    UIWidgets::Tooltip("Randomize the animation played on the menu after a certain time");
+                    UIWidgets::EnhancementRadioButton("Random cycle (Idle)", "gPauseLiveLink", 17);
+                    UIWidgets::Tooltip("Randomize the animation played on the menu after a certain time (Idle animations only)");
+                    if (CVarGetInteger("gPauseLiveLink", 0) >= 16) {
+                        UIWidgets::EnhancementSliderInt("Frame to wait: %d", "##MinFrameCount", "gMinFrameCount", 1, 1000, "", 0);
+                    }
+                    ImGui::EndMenu();
                 }
-            }
-            UIWidgets::Tooltip("Allows strength upgrades to be toggled on and off by pressing A on the strength upgrade in the Equipment Subscreen.\n(This allows performing some glitches that require the player to not have strength).");
 
-            UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
-            UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
-            UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-            UIWidgets::Tooltip("Allow the Bow and magic arrows to be equipped at the same time on different slots.\n(Note: this disables the behaviour of the 'Equip Dupe' glitch).");
-            UIWidgets::PaddedEnhancementCheckbox("Skip Magic Arrow Equip Animation", "gSkipArrowAnimation", true, false);
+                UIWidgets::Spacer(0);
+                UIWidgets::PaddedSeparator();
+
+                UIWidgets::EnhancementCheckbox("Assignable Tunics and Boots", "gAssignableTunicsAndBoots");
+                UIWidgets::Tooltip("Allows equipping the tunic and boots to C-buttons");
+                UIWidgets::EnhancementCheckbox("Removable Tunics and Boots", "gEquipmentCanBeRemoved");
+                UIWidgets::Tooltip("Allows equipment to be unequipped via the Equipment Subscreen.");
+                if (UIWidgets::EnhancementCheckbox("Removable Strength Equipment", "gToggleStrength")) {
+                    if (!CVarGetInteger("gToggleStrength", 0)) {
+                        CVarSetInteger("gStrengthDisabled", 0);
+                    }
+                }
+                UIWidgets::Tooltip("Allows strength upgrades to be toggled on and off by pressing A on the strength upgrade in the Equipment Subscreen.\n(This allows performing some glitches that require the player to not have strength).");
+
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
+
+            if (ImGui::BeginMenu("Inventory Subscreen")) {
+                UIWidgets::DefaultEnhancementCheckbox("Add Additional Inventory Subscreen", "gNewPage", true);
+                UIWidgets::Tooltip("Adds a second Inventory Subscreen for adding new items to the game.");
+
+                UIWidgets::EnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows");
+                UIWidgets::Tooltip("Allow the Bow and magic arrows to be equipped at the same time on different slots.\n"
+                    "(Note: this disables the behaviour of the 'Equip Dupe' glitch).");
+                UIWidgets::EnhancementCheckbox("Skip Magic Arrow Equip Animation", "gSkipArrowAnimation");
+                UIWidgets::Tooltip("Skip the animation that plays in the Inventory Subscreen on equipping magic arrows.");
+                UIWidgets::EnhancementCheckbox("Mask Select in Inventory", "gMaskSelect");
+                UIWidgets::Tooltip("Available after completing the mask trading sub-quest.\n"
+                    "Press [A] + [Any Direction] on the Mask slot in the Inventory Subscreen to select a Mask.");
+
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::Spacer(0);
             UIWidgets::PaddedSeparator();
 
-            UIWidgets::EnhancementCheckbox("Fix L&R Pause Menu", "gUniformLR");
+            UIWidgets::EnhancementCheckbox("Fix L&R in Pause Menu", "gUniformLR");
             UIWidgets::Tooltip("Makes the L and R buttons in the pause menu the same color");
-            UIWidgets::PaddedEnhancementCheckbox("Fix L&Z Page Switch in Pause Menu", "gNGCKaleidoSwitcher", true, false);
+            UIWidgets::EnhancementCheckbox("Fix L&Z Page Switcing in Pause Menu", "gNGCKaleidoSwitcher");
             UIWidgets::Tooltip("Makes L and R switch pages like on the GameCube\nZ opens the Debug Menu instead");
 
             ImGui::EndMenu();
@@ -1115,21 +1140,21 @@ void DrawEnhancementsMenu() {
         if (ImGui::BeginMenu("Restoration"))
         {
             UIWidgets::EnhancementCheckbox("Authentic Logo Screen", "gAuthenticLogo");
-            UIWidgets::Tooltip("Hide the game version and build details and display the authentic model and texture on the boot logo start screen");
-            UIWidgets::PaddedEnhancementCheckbox("Red Ganon Blood", "gRedGanonBlood", true, false);
-            UIWidgets::Tooltip("Restore the original red blood from NTSC 1.0/1.1. Disable for green blood");
-            UIWidgets::PaddedEnhancementCheckbox("Fish While Hovering", "gHoverFishing", true, false);
-            UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows casting the Fishing Rod while using the Hover Boots");
-            UIWidgets::PaddedEnhancementCheckbox("N64 Weird Frames", "gN64WeirdFrames", true, false);
-            UIWidgets::Tooltip("Restores N64 Weird Frames allowing weirdshots to behave the same as N64");
-            UIWidgets::PaddedEnhancementCheckbox("Bombchus Out of Bounds", "gBombchusOOB", true, false);
-            UIWidgets::Tooltip("Allows bombchus to explode out of bounds\nSimilar to GameCube and Wii VC");
-            UIWidgets::PaddedEnhancementCheckbox("Quick Putaway", "gQuickPutaway", true, false);
-            UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing Putaway Ocarina Items");
-            UIWidgets::PaddedEnhancementCheckbox("Restore Old Gold Skulltula Cutscene", "gGsCutscene", true, false);
-            UIWidgets::PaddedEnhancementCheckbox("Quick Bongo Kill", "gQuickBongoKill", true, false);
+            UIWidgets::Tooltip("Hide the game version and build details and display the authentic model and texture on the boot logo start screen.");
+            UIWidgets::EnhancementCheckbox("Red Ganon Blood", "gRedGanonBlood");
+            UIWidgets::Tooltip("Restore original red blood from NTSC 1.0/1.1. Disable for green blood.");
+            UIWidgets::EnhancementCheckbox("Fish While Hovering", "gHoverFishing");
+            UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows casting the Fishing Rod while using the Hover Boots.");
+            UIWidgets::EnhancementCheckbox("N64 Weird Frames", "gN64WeirdFrames");
+            UIWidgets::Tooltip("Restores N64 'weird frames' allowing weirdshots to behave the same as N64.");
+            UIWidgets::EnhancementCheckbox("Bombchus Out of Bounds", "gBombchusOOB");
+            UIWidgets::Tooltip("Allows bombchus to explode out of bounds.\nSimilar to GameCube and Wii VC.");
+            UIWidgets::EnhancementCheckbox("Quick Putaway", "gQuickPutaway");
+            UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows putting away an item without an animation and performing Putaway Ocarina Items.");
+            UIWidgets::EnhancementCheckbox("Restore Old Gold Skulltula Cutscene", "gGsCutscene");
+            UIWidgets::EnhancementCheckbox("Quick Bongo Kill", "gQuickBongoKill");
             UIWidgets::Tooltip("Restore a bug from NTSC 1.0 that allows bypassing Bongo Bongo's intro cutscene to quickly kill him");
-            UIWidgets::PaddedEnhancementCheckbox("Original RBA Values", "gRestoreRBAValues", true, false);
+            UIWidgets::EnhancementCheckbox("Original RBA Values", "gRestoreRBAValues");
             UIWidgets::Tooltip("Restores the original outcomes when performing Reverse Bottle Adventure.");
 
             ImGui::EndMenu();
@@ -1232,7 +1257,7 @@ void DrawEnhancementsMenu() {
         }
 
         UIWidgets::Spacer(0);
-        UIWidgets::PaddedSeparator(false, true);
+        UIWidgets::PaddedSeparator();
 
         // Autosave enum value of 1 is the default in presets and the old checkbox "on" state for backwards compatibility
         UIWidgets::PaddedText("Autosave", false, true);
