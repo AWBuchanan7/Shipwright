@@ -39,8 +39,8 @@ typedef enum {
     /*  8  */ ARROW_0E,
     /*  9  */ ARROW_SEED,
     /*  10 */ ARROW_NUT,
-              ARROW_START,
-              ARROW_END,
+    // Start New
+    /* 11 */ ARROW_BOMB
 } ArrowType;
 
 #endif

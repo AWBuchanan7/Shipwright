@@ -244,11 +244,11 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     bool pauseAnyCursor = (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_RANDO_ONLY && IS_RANDO) ||
                           (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_ALWAYS_ON);
 
-    // only allow mask select when:
-    // the shop is open:
-    // * zelda's letter check: Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_ZELDAS_LETTER)
-    // * kak gate check: Flags_GetInfTable(INFTABLE_SHOWED_ZELDAS_LETTER_TO_GATE_GUARD)
-    // and the mask quest is complete: Flags_GetEventChkInf(EVENTCHKINF_PAID_BACK_BUNNY_HOOD_FEE)
+    // Only allow mask select when:
+    // * The mask shop is open
+    // * Zelda's Letter check: Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_ZELDAS_LETTER)
+    // * Kakariko Gate check: Flags_GetInfTable(INFTABLE_SHOWED_ZELDAS_LETTER_TO_GATE_GUARD)
+    // * The mask quest is complete: Flags_GetEventChkInf(EVENTCHKINF_PAID_BACK_BUNNY_HOOD_FEE)
     bool canMaskSelect = CVarGetInteger("gMaskSelect", 0) &&
                          Flags_GetEventChkInf(EVENTCHKINF_PAID_BACK_BUNNY_HOOD_FEE) &&
                          Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_ZELDAS_LETTER) &&
@@ -598,7 +598,8 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                 pauseCtx->cursorVtx[0].v.ob[1] = pauseCtx->cursorVtx[1].v.ob[1] = pauseCtx->cursorVtx[2].v.ob[1] =
                     pauseCtx->cursorVtx[3].v.ob[1] = -200;
             }
-        } else { // cursorItem set to none if on page changer
+        } else {
+            // cursorItem set to none if on page changer
             pauseCtx->cursorItem[PAUSE_ITEM] = PAUSE_ITEM_NONE;
         }
 
@@ -614,6 +615,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                       ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
     gDPSetEnvColor(POLY_KAL_DISP++, 0, 0, 0, 0);
+
     // Draws vertexes which are on item page
     for (i = 0, j = 24 * 4; i < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); i++, j += 4) {
         if ((gSaveContext.equips.buttonItems[i + 1] != ITEM_NONE) &&
@@ -698,6 +700,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     KaleidoScope_DrawItemCycleExtras(play, SLOT_TRADE_ADULT, gSelectingAdultTrade,
                                      IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_ADULT_TRADE),
                                      Randomizer_GetPrevAdultTradeItem(), Randomizer_GetNextAdultTradeItem());
+
     // Child mask item cycle (mimics the left/right item behavior from the cycling logic above)
     u8 childTradeItem = INV_CONTENT(ITEM_TRADE_CHILD);
     KaleidoScope_DrawItemCycleExtras(play, SLOT_TRADE_CHILD, gSelectingMask, canMaskSelect,
@@ -723,6 +726,11 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
     bool dpad = (CVarGetInteger("gDpadPause", 0) && !CHECK_BTN_ALL(input->cur.button, BTN_CUP));
     bool pauseAnyCursor = (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_RANDO_ONLY && IS_RANDO) ||
                           (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_ALWAYS_ON);
+                          
+    static u16 magicNum = 0x1E; // 30
+    static u16 magicNumB = 0x82; // 130
+    // static u16 magicNumC = 0x9C; // 156
+    static u16 magicNumC = 0x4F; // 79
 
     OPEN_DISPS(play->state.gfxCtx);
 
@@ -774,7 +782,7 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
                                 pauseAnyCursor) {
                                 moveCursorResult = 1;
                             }
-                        } else { // Checks row below from original column. If back on original row move to page left
+                        } else {// Checks row below from original column. If back on original row move to page left
                             pauseCtx->cursorX[PAUSE_ITEM_2] = cursorX;
                             pauseCtx->cursorY[PAUSE_ITEM_2] += 1;
 
@@ -974,8 +982,8 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
 
             pauseCtx->cursorItem[PAUSE_ITEM_2] = cursorItem;
             pauseCtx->cursorSlot[PAUSE_ITEM_2] = cursorSlot;
-
-            if (!CHECK_AGE_REQ_SLOT(cursorSlot)) {
+            
+            if (!CHECK_AGE_REQ_SLOT(cursorSlot + magicNum)) {
                 pauseCtx->nameColorSet = 1;
             }
 
@@ -989,11 +997,13 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
                         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
                     }
                     if (CHECK_BTN_ANY(input->press.button, buttonsToCheck)) {
-                        if (CHECK_AGE_REQ_SLOT(cursorSlot + 24) &&
+                        if (CHECK_AGE_REQ_SLOT(cursorSlot + magicNum) &&
                             (cursorItem != ITEM_SOLD_OUT) && (cursorItem != ITEM_NONE)) {
-                            KaleidoScope_SetupItemEquip(play, cursorItem, cursorSlot + 0x1F,
+                            KaleidoScope_SetupItemEquip(play, (cursorItem + magicNumC), (cursorSlot + magicNum),
+                            // KaleidoScope_SetupItemEquip(play, cursorItem, cursorSlot + 0x1F,
                                                         pauseCtx->item2Vtx[index].v.ob[0] * 10,
                                                         pauseCtx->item2Vtx[index].v.ob[1] * 10);
+                            LUSLOG_DEBUG("SetupItemEquip <item>:%d and <slot>%d\n", (cursorItem + magicNumC), (cursorSlot + magicNum));
                         } else {
                             Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0,
                                                    &D_801333E8);
@@ -1041,8 +1051,10 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
 
         if (gSaveContext.inventory.newItems[i] != ITEM_NONE) {
             if ((pauseCtx->unk_1E4 == 0) && (pauseCtx->pageIndex == PAUSE_ITEM_2) && (pauseCtx->cursorSpecialPos == 0)) {
-                if (CHECK_AGE_REQ_SLOT(i)) {
-                    if (i - 24 == cursorSlot) {
+                // if (CHECK_AGE_REQ_SLOT(i)) {
+                if (CHECK_AGE_REQ_SLOT(i + magicNum)) {
+                    // if (i - 24 == cursorSlot) {
+                    if (i == cursorSlot) {
                         pauseCtx->item2Vtx[j + 0].v.ob[0] = pauseCtx->item2Vtx[j + 2].v.ob[0] =
                             pauseCtx->item2Vtx[j + 0].v.ob[0] - 2;
 
@@ -1060,7 +1072,7 @@ void KaleidoScope_DrawItem2Select(PlayState* play) {
 
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->item2Vtx[j + 0], 4, 0);
 
-            KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gNewItemIcons[i], 32, 32, 0);
+            KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[i + magicNumB], 32, 32, 0);
 
             gSPGrayscale(POLY_KAL_DISP++, false);
         }

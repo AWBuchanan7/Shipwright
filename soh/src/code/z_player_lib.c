@@ -785,12 +785,9 @@ s32 Player_HasMirrorShieldSetToDraw(PlayState* play) {
 // [TO-DO]: Allow for new magic spells
 s32 Player_ActionToMagicSpell(Player* this, s32 actionParam) {
     s32 magicSpell = actionParam - PLAYER_IA_MAGIC_SPELL_15;
-    s32 newMagicSpell = actionParam - PLAYER_IA_MAGIC_SPELL_START;
 
     if ((magicSpell >= 0) && (magicSpell < 6)) {
         return magicSpell;
-    } else if (NewItem_IsActionParamMagicSpell(actionParam)) {
-        return newMagicSpell + 6;
     } else {
         return -1;
     }
@@ -800,8 +797,14 @@ s32 Player_HoldsHookshot(Player* this) {
     return (this->heldItemAction == PLAYER_IA_HOOKSHOT) || (this->heldItemAction == PLAYER_IA_LONGSHOT);
 }
 
+
+
+s32 PlayerItem_IsBow(s16 item) {
+    return ((item >= PLAYER_IA_BOW && item <= PLAYER_IA_BOW_0E) || (item == PLAYER_IA_BOW_BOMB));
+}
+
 s32 Player_HoldsBow(Player* this) {
-    return NewItem_IsActionParamBow(this->heldItemAction);
+    return (PlayerItem_IsBow(this->heldItemAction));
 }
 
 s32 Player_HoldsSlingshot(Player* this) {
@@ -840,12 +843,10 @@ s32 Player_HoldsBrokenKnife(Player* this) {
 
 s32 Player_ActionToBottle(Player* this, s32 actionParam) {
     s32 bottle = actionParam - PLAYER_IA_BOTTLE;
-    s32 newBottle = actionParam - PLAYER_IA_BOTTLE_START;
+    // s32 newBottle = actionParam - PLAYER_IA_BOTTLE_START;
 
     if ((bottle >= 0) && (bottle < 13)) {
         return bottle;
-    } else if (NewItem_IsActionParamBottledItem(actionParam)) {
-        return newBottle + 13;
     } else {
         return -1;
     }
@@ -1837,6 +1838,7 @@ void Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList, Ve
                         (this->heldItemAction == PLAYER_IA_BOW_FIRE) ||
                         (this->heldItemAction == PLAYER_IA_BOW_ICE) ||
                         (this->heldItemAction == PLAYER_IA_BOW_LIGHT) ||
+                        (this->heldItemAction == PLAYER_IA_BOW_BOMB) ||
                         (this->heldItemAction == PLAYER_IA_BOW) ||
                         (this->heldItemAction == PLAYER_IA_SLINGSHOT))) {
                 if (heldActor != NULL) {

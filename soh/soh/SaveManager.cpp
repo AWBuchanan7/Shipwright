@@ -689,7 +689,7 @@ void SaveManager::InitFileDebug() {
 
     // Inventory
     static std::array<u8, 24> sNewItems = {
-        NEW_ITEM_1,     NEW_ITEM_2,         NEW_ITEM_3,        NEW_ITEM_4,       NEW_ITEM_5,       NEW_ITEM_6,
+        NEW_ITEM_1,     NEW_ITEM_2,         NEW_ITEM_3,        ITEM_BOW_BOMB,       NEW_ITEM_5,       NEW_ITEM_6,
         NEW_ITEM_7,     NEW_ITEM_8,         NEW_ITEM_9,        NEW_ITEM_10,      NEW_ITEM_11,      NEW_ITEM_12,
         NEW_ITEM_13,    NEW_ITEM_14,        NEW_ITEM_15,       NEW_ITEM_16,      NEW_ITEM_17,      NEW_ITEM_18,
         NEW_ITEM_19,    NEW_ITEM_20,        NEW_ITEM_21,       NEW_ITEM_22,      NEW_ITEM_23,      NEW_ITEM_24,

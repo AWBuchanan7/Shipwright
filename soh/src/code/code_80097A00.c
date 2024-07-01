@@ -37,7 +37,7 @@ u32 gGsFlagsMasks[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
 u32 gGsFlagsShifts[] = { 0, 8, 16, 24 };
 
 void* gItemIcons[] = {
-    gItemIconDekuStickTex,
+    gItemIconDekuStickTex, // 0
     gItemIconDekuNutTex,
     gItemIconBombTex,
     gItemIconBowTex,
@@ -97,7 +97,7 @@ void* gItemIcons[] = {
     gItemIconBowIceTex,
     gItemIconBowLightTex,
     gItemIconSwordKokiriTex,
-    gItemIconSwordMasterTex,
+    gItemIconSwordMasterTex, // 60
     gItemIconSwordBiggoronTex,
     gItemIconShieldDekuTex,
     gItemIconShieldHylianTex,
@@ -117,7 +117,7 @@ void* gItemIcons[] = {
     gItemIconBombBag20Tex,
     gItemIconBombBag30Tex,
     gItemIconBombBag40Tex,
-    gItemIconGoronsBraceletTex,
+    gItemIconGoronsBraceletTex,  // 120
     gItemIconSilverGauntletsTex,
     gItemIconGoldenGauntletsTex,
     gItemIconScaleSilverTex,
@@ -166,22 +166,18 @@ void* gItemIcons[] = {
     gOcarinaBtnIconCDownTex,
     gOcarinaBtnIconCLeftTex,
     gOcarinaBtnIconCRightTex,
-    gOcarinaBtnIconATex
-};
-
-// [TO-DO]: Shift usage to use these textures for page 2 slots
-void* gNewItemIcons[] = {
-    gItemIconBombTex,                //NEW_ITEM_1
+    gOcarinaBtnIconATex,
+    gItemIconSoldOutTex,             //NEW_ITEM_1
     gItemIconSoldOutTex,             //NEW_ITEM_2
     gItemIconSoldOutTex,             //NEW_ITEM_3
-    gItemIconSoldOutTex,             //NEW_ITEM_4
+    gItemIconBombBag20Tex,           //ITEM_ARROW_BOMB // 173?????
     gItemIconSoldOutTex,             //NEW_ITEM_5
     gItemIconSoldOutTex,             //NEW_ITEM_6
     gItemIconSoldOutTex,             //NEW_ITEM_7
     gItemIconSoldOutTex,             //NEW_ITEM_8
     gItemIconSoldOutTex,             //NEW_ITEM_9
     gItemIconSoldOutTex,             //NEW_ITEM_10
-    gItemIconSoldOutTex,             //NEW_ITEM_11
+    gItemIconSoldOutTex,             //NEW_ITEM_11 // 180
     gItemIconSoldOutTex,             //NEW_ITEM_12
     gItemIconSoldOutTex,             //NEW_ITEM_13
     gItemIconSoldOutTex,             //NEW_ITEM_14
@@ -209,6 +205,11 @@ u8 gItemSlots[] = {
     SLOT_TRADE_CHILD, SLOT_TRADE_CHILD,  SLOT_TRADE_CHILD, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
     SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,  SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
     SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
+    // NEW
+    SLOT_NEW_ITEM_1,  SLOT_NEW_ITEM_2,  SLOT_NEW_ITEM_3,  SLOT_BOW_BOMB,    SLOT_NEW_ITEM_5,  SLOT_NEW_ITEM_6,
+    SLOT_NEW_ITEM_7,  SLOT_NEW_ITEM_8,  SLOT_NEW_ITEM_9,  SLOT_NEW_ITEM_10, SLOT_NEW_ITEM_11, SLOT_NEW_ITEM_12,
+    SLOT_NEW_ITEM_13, SLOT_NEW_ITEM_14, SLOT_NEW_ITEM_15, SLOT_NEW_ITEM_16, SLOT_NEW_ITEM_17, SLOT_NEW_ITEM_18,
+    SLOT_NEW_ITEM_19, SLOT_NEW_ITEM_20, SLOT_NEW_ITEM_21, SLOT_NEW_ITEM_22, SLOT_NEW_ITEM_23, SLOT_NEW_ITEM_24
 };
 
 void Inventory_ChangeEquipment(s16 equipment, u16 value) {

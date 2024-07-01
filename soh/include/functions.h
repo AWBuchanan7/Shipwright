@@ -1129,6 +1129,7 @@ s32 Player_HasMirrorShieldEquipped(PlayState* play);
 s32 Player_HasMirrorShieldSetToDraw(PlayState* play);
 s32 Player_ActionToMagicSpell(Player* player, s32 actionParam);
 s32 Player_HoldsHookshot(Player* player);
+s32 PlayerItem_IsBow(s16 item);
 s32 Player_HoldsBow(Player* player);
 s32 Player_HoldsSlingshot(Player* player);
 s32 func_8008F128(Player* player);
@@ -2463,8 +2464,7 @@ void Interface_RandoRestoreSwordless(void);
  * New Item lib functions.
  * [TO-DO]: Reorder these to match file.
  * 
- */ 
-bool NewItem_IsActionParamBow(s16 actionParam);
+ */
 bool NewItem_IsActionParamBoots(s16 actionParam);
 bool NewItem_IsActionParamTunic(s16 actionParam);
 bool NewItem_IsActionParamShield(s16 actionParam);
@@ -2475,20 +2475,11 @@ bool NewItem_IsActionParamBottledItem(s16 actionParam);
 bool NewItem_IsActionParamBottledSellable(s16 actionParam);
 bool NewItem_IsActionParamBottledConsumable(s16 actionParam);
 bool NewItem_IsActionParamMagicSpell(s16 actionParam);
+
 s32 NewItem_ActionParamToArrowType(s16 actionParam);
 u16 NewItem_ActionParamToBoots(s16 actionParam);
 u16 NewItem_ActionParamToTunic(s16 actionParam);
 u8 NewItem_ActionParamToMask(s16 actionParam);
-s32 NewItem_GetCutsceneItem(s16 actionParam);
-s32 NewItem_GetExchangeItem(s32 tradeItem, s32 bottle);
-s32 NewItem_GetBottleDrinkEffect(s16 actionParam);
-s16 NewItem_GetArrowActorId(s16 arrowType);
-bool NewItem_IsActionParamBottledExchange(s16 actionParam);
-bool NewItem_IsActionParamTradeItem(s16 actionParam);
-u8 NewItem_GetMagicArrowCost(s16 arrowType);
-void *NewItem_GetBlureArrow(s16 arrowType);
-u32 NewItem_GetArrowDamageFlag(s16 arrowType);
-s16 NewItem_ItemToActionParam(s32 newItem);
 
 // #endregion
 

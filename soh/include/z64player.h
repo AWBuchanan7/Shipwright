@@ -64,26 +64,29 @@ typedef enum {
     /* 0x09 */ PLAYER_MASK_MAX
 } PlayerMask;
 
+/*
+ * ItemAction Definitions
+ */
 typedef enum {
-    /* 0x00 */ PLAYER_IA_NONE,
+    /* 0x00 */ PLAYER_IA_NONE,              // 00
     /* 0x01 */ PLAYER_IA_LAST_USED,
     /* 0x02 */ PLAYER_IA_FISHING_POLE,
     /* 0x03 */ PLAYER_IA_SWORD_MASTER,
     /* 0x04 */ PLAYER_IA_SWORD_KOKIRI,
-    /* 0x05 */ PLAYER_IA_SWORD_BIGGORON,
-    /* 0x06 */ PLAYER_IA_DEKU_STICK,
+    /* 0x05 */ PLAYER_IA_SWORD_BIGGORON,    // 05
+    /* 0x06 */ PLAYER_IA_DEKU_STICK,        // 06
     /* 0x07 */ PLAYER_IA_HAMMER,
-    /* 0x08 */ PLAYER_IA_BOW,
+    /* 0x08 */ PLAYER_IA_BOW,               // 08
     /* 0x09 */ PLAYER_IA_BOW_FIRE,
-    /* 0x0A */ PLAYER_IA_BOW_ICE,
+    /* 0x0A */ PLAYER_IA_BOW_ICE,           // 10
     /* 0x0B */ PLAYER_IA_BOW_LIGHT,
     /* 0x0C */ PLAYER_IA_BOW_0C,
     /* 0x0D */ PLAYER_IA_BOW_0D,
     /* 0x0E */ PLAYER_IA_BOW_0E,
-    /* 0x0F */ PLAYER_IA_SLINGSHOT,
-    /* 0x10 */ PLAYER_IA_HOOKSHOT,
-    /* 0x11 */ PLAYER_IA_LONGSHOT,
-    /* 0x12 */ PLAYER_IA_BOMB,
+    /* 0x0F */ PLAYER_IA_SLINGSHOT,         // 15
+    /* 0x10 */ PLAYER_IA_HOOKSHOT,          // 16
+    /* 0x11 */ PLAYER_IA_LONGSHOT,          // 17
+    /* 0x12 */ PLAYER_IA_BOMB,              // 18
     /* 0x13 */ PLAYER_IA_BOMBCHU,
     /* 0x14 */ PLAYER_IA_BOOMERANG,
     /* 0x15 */ PLAYER_IA_MAGIC_SPELL_15,
@@ -132,7 +135,10 @@ typedef enum {
     /* 0x40 */ PLAYER_IA_MASK_GERUDO,
     /* 0x41 */ PLAYER_IA_MASK_TRUTH,
     /* 0x42 */ PLAYER_IA_LENS_OF_TRUTH,
-    // Upstream TODO: Document why these entries were added
+    /*
+     * New Equipment Slots
+     * Upstream TODO: Document why these entries were added
+     */
     /* 0x43 */ PLAYER_IA_SHIELD_DEKU,
     /* 0x44 */ PLAYER_IA_SHIELD_HYLIAN,
     /* 0x45 */ PLAYER_IA_SHIELD_MIRROR,
@@ -141,32 +147,16 @@ typedef enum {
     /* 0x48 */ PLAYER_IA_TUNIC_ZORA,
     /* 0x49 */ PLAYER_IA_BOOTS_KOKIRI,
     /* 0x4A */ PLAYER_IA_BOOTS_IRON,
-    /* 0x4B */ PLAYER_IA_BOOTS_HOVER,
-    // NEW ITEM ACTION GROUPS
-    // NEW MELEE WEAPONS [TO-DO]
-               PLAYER_IA_MELEE_START,
-               PLAYER_IA_MELEE_END,
-    // NEW BOW WEAPONS
-               PLAYER_IA_BOW_START,
-               PLAYER_IA_BOW_END,
-    // NEW MAGIC SPELLS
-               PLAYER_IA_MAGIC_SPELL_START,
-               PLAYER_IA_MAGIC_SPELL_END,
-    // NEW OCARINAS
-               PLAYER_IA_OCARINA_START,
-               PLAYER_IA_OCARINA_END,
-    // NEW BOTTLED ITEMS
-               PLAYER_IA_BOTTLE_START,
-               PLAYER_IA_BOTTLE_END,
-    // NEW TRADE ITEMS
-               PLAYER_IA_TI_START,
-               PLAYER_IA_TI_END,
-    // NEW MASK ITEMS
-               PLAYER_IA_MASK_START,
-               PLAYER_IA_MASK_END,
-    // NEW UNIQUE ITEMS
-               PLAYER_IA_UNIQUE_START,
-    /* 0x4C */ PLAYER_IA_MAX
+    /* 0x4B */ PLAYER_IA_BOOTS_HOVER, // 75
+    /*
+     * Expanded Inventory Slots
+     */
+    /* 0x4C */ PLAYER_IA_NEW_0,     // 76
+    /* 0x4D */ PLAYER_IA_NEW_1,     // 77
+    /* 0x4E */ PLAYER_IA_NEW_2,     // 78
+    /* 0x4F */ PLAYER_IA_BOW_BOMB,  // 79
+    /* 0x50 */ PLAYER_IA_NEW_3,     // 80
+    /* 0x51 */ PLAYER_IA_NEW_4      // 81
 } PlayerItemAction;
 
 typedef enum {
